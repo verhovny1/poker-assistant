@@ -1,19 +1,51 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset="UTF-8">
     <title>Poker Assistant</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+ 
 
-    <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
-    </script>
+    <script>window.$ = window.jQuery = require('jquery');</script> 
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+
+  <body>
+      
+      <table style="text-align: center;">
+          <tr>
+            <td>
+                <button id="settingsAppBtn" class="btn btn-primary" style="width: 100%" >Налаштувати захоплення</button> 
+            </td>
+          </tr>
+
+          <tr >
+            <td>
+                <div>
+                  <!--  <canvas id="canv1"  style="border: 1px solid black;" ></canvas> -->
+                    <button id="startAppWorkBtn" class="btn btn-primary" >Запуск</button> 
+                    <button id="stopAppWorkBtn" class="btn btn-primary" >Зупинка</button> 
+                    <button id="exitAppBtn" class="btn btn-primary" >Вийти</button> 
+                </div>
+            </td>
+            <tr>
+              <td>
+                    <label>Консоль</label><br>
+                    <textarea rows="8" cols="35" name="outData" ></textarea>
+                </div>
+              </td>
+          </tr>
+          
+      </table>
+        
   </body>
 </html>
+
+
+ 
+<script>
+  require('./renderer.js');
+  require('./functions.js');
+
+</script>

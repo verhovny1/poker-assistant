@@ -9,14 +9,21 @@
   "repository": "https://github.com/verhovny1/poker-assistant.git",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "quick"
   ],
-  "author": "GitHub",
+  "author": "Verhovny Menko",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^5.0.0"
+  },
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "capture-electron": "^3.0.1",
+    "electron-modal": "^1.0.0",
+    "electron-screenshot-app": "^4.0.3",
+    "electron-screenshot-service": "^4.0.3",
+    "jimp": "^0.6.4",
+    "jquery": "^3.4.1",
+    "sharp": "^0.22.1"
   }
 }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="UTF-8">
+	    <title>Setting of the program</title>
+	 
+	    <script>window.$ = window.jQuery = require('jquery');</script> 
+	    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+	    <link rel="stylesheet" href="css/modal.css">
+  	</head>
+
+  	<body>
+ 
+   
+	    <table  >
+	        <tr class="trImage" >
+	        	<td class="trImage">
+	        		<div class="divImage" >
+	         <!-- 			<canvas id="modalCanv"  style=" height: auto; width: 100%; overflow-x: scroll;" ></canvas> -->
+	         			<canvas id="modalCanv" width="600px"  height="440px" style="width: 600px;height: 440px;"    ></canvas> 
+	          		</div>
+	        	</td>
+	        </tr>
+
+	        <tr class="trElements"   >
+	        	<td  class="tdElements">
+	          		<div class="divElements" id="divElements" >
+	          			<div class="form-inline">
+		         			<div class="form-group mb-2">
+			          			<div class="appObj" id="Area1" >
+			          				<input id="inp1" value="cardsOnTable" style="display: none;">
+									<input type="radio" id="Area1ChB"  name="rb">
+			          				<label>Cards on table</label>
+			          			</div>
+			          			<div class="appObj" id="Area2" >
+			          				<input id="inp2" value="CardsOfPlayer1" style="display: none;">
+			          				<input type="radio" id="Area2ChB" name="rb">
+			          				<label>Cards of player 1 (My cards)</label>
+			          			</div>
+			          			<div class="appObj" id="Area3" >
+			          				<input id="inp3" value="AreaOfPlayer1" style="display: none;">
+			          				<input type="radio" id="Area3ChB" name="rb">
+			          				<label>Area of 1 (My cards)</label>
+			          			</div>
+			          			<div class="appObj" id="Area4" >
+			          				<input id="inp4" value="CardsOfPlayer2" style="display: none;">
+			          				<input type="radio" id="Area4ChB" name="rb">
+			          				<label>Cards of player 2</label>
+			          			</div>
+			          			<div class="appObj" id="Area5" >
+			          				<input id="inp5" value="AreaOfPlayer2" style="display: none;">
+			          				<input type="radio" id="Area5ChB" name="rb">
+			          				<label>Area of player 2</label>
+			          			</div>
+
+			          			<div class="appObj" id="Area6" >
+			          				<input id="inp6" value="CardsOfPlayer3" style="display: none;">
+			          				<input type="radio" id="Area6ChB" name="rb">
+			          				<label>Cards of player 3</label>
+			          			</div>
+			          			<div class="appObj" id="Area7" >
+			          				<input id="inp7" value="AreaOfPlayer3" style="display: none;">
+			          				<input type="radio" id="Area7ChB" name="rb">
+			          				<label>Area of player 3</label>
+			          			</div>
+			          			<div class="appObj" id="Area8" >
+			          				<input id="inp8" value="CardsOfPlaye4" style="display: none;">
+			          				<input type="radio" id="Area8ChB" name="rb">
+			          				<label>Cards of player 4</label>
+			          			</div>
+			          			<div class="appObj" id="Area9" >
+			          				<input id="inp9" value="AreaOfPlayer4" style="display: none;">
+			          				<input type="radio" id="Area9ChB" name="rb">
+			          				<label>Area of player 4</label>
+			          			</div>
+			          			<div class="appObj" id="Area10" >
+			          				<input id="inp10" value="CardsOfPlayer5" style="display: none;">
+			          				<input type="radio" id="Area10ChB" name="rb">
+			          				<label>Cards of player 5</label>
+			          			</div>
+			          			<div class="appObj" id="Area11" >
+			          				<input id="inp11" value="AreaOfPlayer5" style="display: none;">
+			          				<input type="radio" id="Area11ChB" name="rb">
+			          				<label>Area of player 5</label>
+			          			</div>
+
+
+			          			<div class="appObj" id="Area12" >
+			          				<input id="inp12" value="CardsOfPlaye6" style="display: none;">
+			          				<input type="radio" id="Area12ChB" name="rb">
+			          				<label>Cards of player 6</label>
+			          			</div>
+			          			<div class="appObj" id="Area13" >
+			          				<input id="inp13" value="AreaOfPlayer6" style="display: none;">
+			          				<input type="radio" id="Area13ChB" name="rb">
+			          				<label>Area of player 6</label>
+			          			</div>
+			          			<div class="appObj" id="Area14" >
+			          				<input id="inp14" value="CardsOfPlayer7" style="display: none;">
+			          				<input type="radio" id="Area14ChB" name="rb">
+			          				<label>Cards of player 7</label>
+			          			</div>
+			          			<div class="appObj" id="Area15" >
+			          				<input id="inp15" value="AreaOfPlayer7" style="display: none;">
+			          				<input type="radio" id="Area15ChB" name="rb">
+			          				<label>Area of player 7</label>
+			          			</div>
+			          			<div class="appObj" id="Area16" >
+			          				<input id="inp16" value="CardsOfPlayer8" style="display: none;">
+			          				<input type="radio" id="Area16ChB" name="rb">
+			          				<label>Cards of player 8</label>
+			          			</div>
+			          			<div class="appObj" id="Area17" >
+			          				<input id="inp17" value="AreaOfPlayer8" style="display: none;">
+			          				<input type="radio" id="Area17ChB" name="rb">
+			          				<label>Area of player 8</label>
+			          			</div>
+			          			<div class="appObj" id="Area18" >
+			          				<input id="inp18" value="CardsOfPlayer9" style="display: none;">
+			          				<input type="radio" id="Area18ChB" name="rb">
+			          				<label>Cards of player 9</label>
+			          			</div>
+			          			<div class="appObj" id="Area19" >
+			          				<input id="inp19" value="AreaOfPlayer9" style="display: none;">
+			          				<input type="radio" id="Area19ChB" name="rb">
+			          				<label>Area of player 9</label>
+			          			</div>
+			          			<div class="appObj" id="Area20" >
+			          				<input id="inp20" value="CardsOfPlaye10" style="display: none;">
+			          				<input type="radio" id="Area20ChB" name="rb">
+			          				<label>Cards of player 10</label>
+			          			</div>
+			          			<div class="appObj" id="Area21" >
+			          				<input id="inp21" value="AreaOfPlayer10" style="display: none;">
+			          				<input type="radio" id="Area21ChB" name="rb">
+			          				<label>Area of player 10</label>
+			          			</div>
+
+	          				</div>
+		          	 	</div>
+	          		</div>
+	        	</td>
+	        </tr>
+	        
+	        <tr class="trMenu" >
+	        	<td class="tdMenu" >
+	        		<div class="divMenu">
+		         		<div class="form-inline">
+		         			<div class="form-group mb-2" style="text-align: right;">
+				    <!--      		<button id="" class="btn btn-primary" >Новий елемент</button><pre> </pre>
+				          		<button id="" class="btn btn-primary" >Видалить елемент</button><pre> </pre> -->
+				          		<button id="load5PleyerBtn" class="btn btn-primary" >Load for 5 players</button><pre> </pre>
+				          		<button id="load10PleyerBtn" class="btn btn-primary" >Load for 10 players</button><pre> </pre>
+				     <!--     		<button id="" class="btn btn-primary" >Зберегти стандарт</button><pre> </pre>  -->
+				    <!--      		<div style="border-left:2px solid grey;height:50px"></div><pre> </pre>
+				          		<button id="zomAddBtn" class="btn btn-primary" >+</button><pre> </pre>
+				          		<button id="zomSubBtn" class="btn btn-primary" >-</button><pre> </pre>
+				          		<div style="border-left:2px solid grey;height:50px"></div><pre> </pre> -->
+			          			<button id="closseModalBtn" class="btn btn-primary" >Close</button>
+		          			</div>
+		          	 	</div>
+	          	 	</div>
+	        	</td>
+	        </tr>
+	    </table>
+ 
+        
+  	</body>
+</html>
+ 
+
+<script>
+  require('./modal.js');
+</script>
+

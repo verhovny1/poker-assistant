@@ -1,0 +1,91 @@
+body{
+
+	 
+	width:100%;
+	
+
+	
+	
+	/*
+	height: 650px;
+	border: 2px solid green;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border-radius: 5px;
+
+	*/
+	
+	overflow-y: scroll;
+}
+
+table{
+	height:100%;
+	width: 100%;
+ 
+	/*border: 2px solid blue;*/
+}
+
+
+
+.trImage{
+ 
+}
+.tdImage{
+	/*
+	height:100%;
+	width:100%;
+	*/
+
+	height:100%;
+	width:100%;
+
+ 
+}
+.divImage{
+	height:460px;
+	width:100%;
+	/*border: 2px solid black;*/
+	/*text-align: center;
+	 */
+}
+ 
+
+.trElements{
+	
+}
+.tdElements{
+	height:150px;
+}
+.divElements{
+	height:150px;
+	/*border: 2px solid black;*/
+	width:100%;
+	overflow: scroll;
+}
+.appObj{
+	margin: 5px; 
+	padding: 5px;
+	text-align: center;
+
+	height:120px;
+	width:120px;
+
+	border: 1px solid green;
+	border-radius: 5px;
+
+}
+
+
+.trMenu{
+	
+}
+.tdMenu{
+	height:50px;
+}
+.divMenu{
+	height:50px;
+	/*border: 2px solid black;*/
+	width:100%;
+	text-align: center;
+	overflow: hidden;
+}
