@@ -102,55 +102,107 @@ exports.getMaxMinVal = function( val1, val2)
     return retVal;
 }
 
+ 
 
-exports.getRGBA = function(r,g,b,a)
+exports.slice2dArr = function( arr , arg )
 {
-    RGBA = {};
-    RGBA.R = r;
-    RGBA.G = g;
-    RGBA.B = b;
-    RGBA.A = a;
+    let newArr = [];
 
-    return RGBA;
+    let count = 0;
+    for (var i = arg.top; i <= arg.bottom; i++) 
+    {
+        newArr[count] = arr[i].slice(arg.left, arg.right );
+        count++;
+    }
+
+    return newArr;
 }
 
 
-exports.draRestlengOnCanvas = function(canvasId,canvastoId, x1,y1,x2,y2 , RGBA)
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.binarize = function ( data, metod = 1 )
 {
-    //находим canvas
-    var canvas = document.getElementById(canvasId);
-    // получаем его 2D контекст
-    var context = canvas.getContext('2d');
-    // получаем объект, описывающий внутреннее состояние области контекста
-    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    var data = imageData.data;  
+
+    //визначення прогу, в залежності від обраного методу
+    var porog = 0;
+    var count = data.length;
+    
+
+    if (metod == 1) 
+        porog = 128;
+    if (metod == 2) 
+    {
+        let max = 0; min = 255;
+        for (var i = 0; i < count; i += 4) 
+        {
+            let R = data[i];
+            let G = data[i + 1];
+            var B = data[i + 2];
+            let A = data[i + 3];
+            let seredne = (R + B + G) / 3;
+
+            if (seredne > max) max = seredne;
+            if (seredne < min) min = seredne;
+        }
+        porog = min + (max - min) / 2;
+    }
+
+    else if (metod == 3) 
+    {
+        for (var i = 1; i < 255 ; i += 1) 
+        {
+            var Wite = 0, Dark = 0;
+            for (var n = 0; n < count ; n += 4) 
+            {
+                var R = data[i];
+                var G = data[i + 1];
+                var B = data[i + 2];
+                var seredne = (R + B + G) / 3;
+
+                if (seredne <= i) Wite++; else Dark++;
+            }
+            if (Wite > Dark) 
+            {
+                porog = i;
+                break;
+            }
+        }
+    }
 
 
-    //розпаковуємо одномірний масив R D G A в 2Д масив  R D G A
-    var pA = this.getRGB2dArr(data, canvas.width, canvas.height);
-    var MYleft=this.getMaxMinVal(x1, x2).min;
-    var MYtop=this.getMaxMinVal(y1, y2).min;
-    var MYright=this.getMaxMinVal(x1, x2).max;
-    var MYbottom=this.getMaxMinVal(y1, y2).max;
+    //Заміна пікселей
+    for (var i = 0; i < count ; i += 4) {
+        var R = data[i];
+        var G = data[i + 1];
+        var B = data[i + 2];
+        var A = data[i + 3];
+        var seredne = (R + B + G) / 3;
 
-        for (var m = MYtop; m <= MYbottom; m++) { pA[m][MYleft].R = RGBA.R; pA[m][MYleft].G = RGBA.G; pA[m][MYleft].B = RGBA.B; pA[m][MYleft].A = RGBA.A;  }
-        for (var m = MYtop; m <= MYbottom; m++) { pA[m][MYright].R = RGBA.R; pA[m][MYright].G = RGBA.G; pA[m][MYright].B = RGBA.B; pA[m][MYright].A = RGBA.A;}
-        for (var m = MYleft; m <= MYright; m++) { pA[MYtop][m].R = RGBA.R; pA[MYtop][m].G = RGBA.G; pA[MYtop][m].B = RGBA.B; pA[MYtop][m].A = RGBA.A;}
-        for (var m = MYleft; m <= MYright; m++) { pA[MYbottom][m].R = RGBA.R; pA[MYbottom][m].G = RGBA.G; pA[MYbottom][m].B = RGBA.B; pA[MYbottom][m].A = RGBA.A;}
-
-    //Упаковуємо 2Д масив R D G A в одномірний
-    dataArray = this.set2dArrRGB(pA);
-    //Замінюємо елементи у масиві пікселей imageData.data
-    for (var i = 0; i < data.length; i += 1) { data[i] = dataArray[i]; }
-
-    // создаем или находим canvas
-    var canvasTo = document.getElementById(canvastoId);
-        canvasTo.width = canvas.width;
-        canvasTo.height = canvas.height;
-        canvasTo.style.width = canvas.style.width;
-        canvasTo.style.height = canvas.style.height;
-    // получаем его 2D контекст
-    var contextTo = canvasTo.getContext('2d');
-    //вставляємо imageData у context канваса
-    contextTo.putImageData(imageData, 0, 0);
+        if (seredne > porog) 
+        { 
+            data[i] = 255; 
+            data[i + 1] = 255; 
+            data[i + 2] = 255; 
+        }
+        else 
+        { 
+            data[i] = 0; 
+            data[i + 1] = 0; 
+            data[i + 2] = 0; 
+        }
+    }
+ 
+    return data;
 }

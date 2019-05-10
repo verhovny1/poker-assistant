@@ -3,6 +3,10 @@ const {app, BrowserWindow} = require('electron')
 const { ipcMain } = require('electron')
 const { session } = require('electron')
 
+const electron = require("electron")
+const { ipcRenderer, remote } = require('electron');
+const desktopCapturer = electron.desktopCapturer;
+ 
  
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -50,7 +54,7 @@ function createWindow () {
     
     mainWindow = null
   })
-
+ 
   // Emitted when the window is closed.
   modalWindow.on('closed', (event) =>   {
     // Dereference the window object, usually you would store windows
@@ -91,8 +95,10 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
+
  
- 
+
+
 	 
 
 
@@ -110,7 +116,6 @@ ipcMain.on('modalWindowSendBitmap', (event, arg) => {
   console.log(arg.bitmap[0]);console.log(arg.bitmap[1]);
 })
 
-
 ipcMain.on('mainWindow', (event, arg) => {
   if( arg == "startWork") {}
   else if( arg == "stopWork") {}
@@ -120,19 +125,8 @@ ipcMain.on('mainWindow', (event, arg) => {
 })
 
 
-
-ipcMain.on('asynchronous-message', (event, arg) => {
-  if ( event == "showModal"    ) modalWindow.show();
-  //if ( arg == "hideModal" && modalWindow.visible == true  ) modalWindow.hide();
-	//console.log(event); // prints "ping"
-	//console.log(arg); // prints "ping"
-  //event.sender.send('asynchronous-reply', 'pong')
-})
-
-ipcMain.on('synchronous-message', (event, arg) => {
-	console.log(arg) // prints "ping"
- 	event.returnValue = global.bitmap
-})
+ 
+ 
 
 
 

@@ -12,68 +12,89 @@ const { ipcRenderer, remote } = require('electron');
 const functions = require('./functions.js');
 	let isWork = false;
 	let percentageIncreaseSize = 1;
+	let logText = "";
  
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
 
+
+
+function getWindows()
+{
+  desktopCapturer.getSources({types: ['window', 'screen']}, (error, sources) => {
+    
+    if (error) throw error;
+    let retArr = [];
+
+    let text = "";
+    for (let i = 0; i < sources.length; ++i)  
+    {
+    	retArr[i] = sources[i].name;
+      	text += "<option value='"+retArr[i]+"' >"+retArr[i]+"</option>";
+    }
+    let windowsSelect = document.getElementById('windowsSelect');
+	windowsSelect.innerHTML = text;
+    
+  });
+}
+getWindows();
 
 //////////////////////////////////////////Події кнопок//////////////////////////////////////////
 //Кнопка налаштувань програми
 const settingsApp = document.getElementById('settingsAppBtn');
 settingsApp.addEventListener('click', function(event)
 {
-  	let thumbSize = determinaScreenShot( percentageIncreaseSize );
-  	let imageWeight = sizeScreenShot( percentageIncreaseSize ).width;
-  	let imageHeight = sizeScreenShot( percentageIncreaseSize ).height;
+	let windowsSelect = document.getElementById('windowsSelect');
+ 	let selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;
+ 	let thumbSize = determinaScreenShot( percentageIncreaseSize );
+	let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
 
-	let options = { types:['window','screen'], thumbnailSize: thumbSize };
- 
-	desktopCapturer.getSources(options,function(error, sources)
-	{
-    	if(error) return console.log(error.massage);
-    	sources.forEach(function(source)
-    	{
-    		if(source.name === "Entire screen" || source.name === "Screen 1" )
-      		{
-      			 
+    desktopCapturer.getSources( option , (error, sources) => {
+        if (error) throw error;
 
-				//console.log(source);
-				//console.log(source.thumbnail.toPNG() );
- 			 
-		 		/*
-		 		const screenshotPath = path.join(os.tmpdir(), 'screenshot.png')
-		        fs.writeFile(screenshotPath, source.thumbnail.toPNG(), function (error) {
-		        	if (error) return console.log(error)
-		          	shell.openExternal('file://' + screenshotPath) 
-		        }) */
-
-	      		//забираємо масив пікселів з зображення
-	      		let bitmap = source.thumbnail.getBitmap();
-	      		let newbitmap = bitmap.slice(0, imageWeight * imageHeight * 4);
-	      		 
- 
-			    //Зберігаємо в канвас
-	 			//setArrToCanvas( bitmap, "canv1");
-  
-  				//відкриваємо вікно налаштувань
+        for (let i = 0; i < sources.length; ++i) 
+        {	
+        	if (sources[i].name === selWindow) {
+                
+        		//console.log(sources[i]);
+           		//console.log(sources[i].thumbnail.getBitmap());
+				//console.log(sources[i].thumbnail.getSize());
+				let bitmap = sources[i].thumbnail.getBitmap();
+				let siz = sources[i].thumbnail.getSize();
+				//bitmap = functions.binarize( bitmap , 2 );
+           		//відкриваємо вікно налаштувань
 			    ipcRenderer.send('modalWindow', 'show');
 			    //ipcRenderer.send('modalWindow', { bitmap:newbitmap, width : imageWeight, height: imageHeight} );
 			    arg = {}
-			    arg.bitmap = newbitmap;
-			    arg.width = imageWeight;
-			    arg.height = imageHeight;
-			    ipcRenderer.send('modalWindowSendBitmap', arg );
-			    console.log(bitmap[0]);console.log(bitmap[1]);
-      		}
-    	});
-  	});	
+			    arg.bitmap = bitmap;
+			    arg.width = siz.width;
+			    arg.height = siz.height;
+			    ipcRenderer.send('modalWindowSendBitmap', arg );    
+            }
+        }
+    });
+
 });
+
+ 
+const updateWindows = document.getElementById('updateWindows');
+updateWindows.addEventListener('click', function(event)
+{
+	getWindows();
+});
+
 
 //запуск рооти програми
 const startAppWork = document.getElementById('startAppWorkBtn');
 startAppWork.addEventListener('click', function(event)
 {
-	isWork = true;
-	timerApp();
+	mainRecognition();
+
+	//isWork = true;
+	//timerApp();
 });
+
 
 //запуск рооти програми
 const stopAppWor = document.getElementById('stopAppWorkBtn');
@@ -106,7 +127,9 @@ function timerApp()
 	timerApp();
 }, 1000);*/
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////Функці допоміжні//////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 function determinaScreenShot( size = 1)
 {
 	const screenSize = electronScreen.getPrimaryDisplay().workAreaSize;
@@ -126,73 +149,144 @@ function sizeScreenShot( size = 1)
   	};
 };
 
-//Записати пікслелiв в канвас
-function setArrToCanvas( dataArray , canvasId)
+function readConfig()
 {
-	const thumbSize = determinaScreenShot();
-    let W = thumbSize.width;
-    let H = thumbSize.height;
+	let odjectsData = [];
 
-    //находим canvas
-    var canvas = document.getElementById(canvasId);
-    canvas.width =  W;
-    canvas.height =  H;
-    canvas.style.width = W + "px";
-    canvas.height.width = H + "px"; 
-  
-    var context = canvas.getContext('2d');
-	var myImageData = context.createImageData( W, H);
-	for (i = 0; i < dataArray.length; i += 1)  
-		myImageData.data[i] = dataArray[i];
+	fs.readFile("config.tx", function(err, buf) {
+	 	str = buf.toString();
+	  	var res = str.split("\n");
+	  	
+	  	let playersCount = res[0].replace( "playersCount:", "");
+	  	playersCount = parseInt( playersCount, 10 );
+		odjectsData['playersCount'] =  playersCount;
+		
+		let counter = 1;
+		for (var i = 1; i < res.length ; i+=7) 
+		{
+			let obj = {};
+			obj.id = res[i+1].replace( "id:", "");
+			obj.type = res[i+2].replace( "type:", "");
+			obj.left = res[i+3].replace( "left:", "");
+			obj.top = res[i+4].replace( "top:", "");
+			obj.right = res[i+5].replace( "right:", "");
+			obj.bottom = res[i+6].replace( "bottom:", "");
 
-	context.putImageData(myImageData, 0, 0); 
+			odjectsData[ res[i].toString() ] = obj;
+		}
+
+		
+	});
+
+	return odjectsData;
 }
 
- 
+function getTime()
+{
+	let today = new Date();
+
+	return time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + ":" + today.getMilliseconds();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////Функці обробки та розпізнавання//////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //на вході масив пікселів зображення
 //на виході масив розпізнаних обєктів
 function mainRecognition( )
 {
-	let thumbSize = determinaScreenShot( percentageIncreaseSize );
-  	let imageWeight = sizeScreenShot( percentageIncreaseSize ).width;
-  	let imageHeight = sizeScreenShot( percentageIncreaseSize ).height;
-	let options = { types:['screen'], thumbnailSize: thumbSize };
- 	let bitmap = [];
+	//одержуємо данні обєктів
+	let odjectsData = readConfig();
+logText = "";
+logText += "Start = " + getTime() + "\n";
 
-	desktopCapturer.getSources(options,function(error, sources)
-	{
-    	if(error) console.log(error.massage);
-    	sources.forEach(function(source)
-    	{
-    		if(source.name === "Entire screen" || source.name === "Screen 1" )
-      		{
 
-      			//percentageIncreaseSize - змына розмiру зображення https://github.com/lovell/sharp
+	let windowsSelect = document.getElementById('windowsSelect');
+ 	let selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;
+ 	let thumbSize = determinaScreenShot( percentageIncreaseSize );
+	let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
+	let bitmap = [];
 
-	      		//забираємо масив пікселів з зображення
-	      		bitmap = source.thumbnail.getBitmap().slice(0, imageWeight * imageHeight * 4);	      		
-	      		console.log( bitmap );
+    desktopCapturer.getSources( option , (error, sources) => {
+        if (error) throw error;
 
-	      		data = functions.getRGB2dArr( bitmap, imageWeight, imageHeight);
-	      		console.log(data[0][0]);
+        for (let i = 0; i < sources.length; ++i) 
+        {	
+        	if (sources[i].name === selWindow) {
+                
+        		//console.log(sources[i]);
+           		//console.log(sources[i].thumbnail.getBitmap());
+				//console.log(sources[i].thumbnail.getSize());
+
+				//отримуємо розміри та бітмап зображення
+				let siz = sources[i].thumbnail.getSize();
+				let bitmap = sources[i].thumbnail.getBitmap(); //.slice(0, siz.width * siz.height * 4);	
+
  
-	      			//взять з куків данні про положення обєктів
+logText += "get bitmap = " + getTime() + "\n";
 
-					//вирізать їх з зображення в окремі обєкти
+				bitmap = functions.binarize( bitmap , 2 );
 
-					//Розпаралеленя
+logText += "binarize bitmap = " + getTime() + "\n";
+
+ 				//перетворюємо його в 2Д масив
+	      		let data = functions.getRGB2dArr( bitmap, siz.width, siz.height);
+
+
+
+logText += "convert to 2D arr = " + getTime() + "\n";
+
+		      		
+		      		//console.log(odjectsData); 
+		      		let playersCount = odjectsData['playersCount']; //кількість гравців
+	      			//console.log(playersCount); 
+	      			
+
+	      			//вирізать з зображення обєкти
+
+	      			for (var i = 1; i <= playersCount*2+1; i++) 
+	      			{
+	      				let area = odjectsData['Area'+i.toString() ];
+	      				let areaData = functions.slice2dArr( data, area );
+	      				odjectsData['Area'+i.toString() ]['data'] = areaData;
+			
+	      			}
+
+logText += "gets areas from img = " + getTime() + "\n";
+
+ 
+	      			console.log(odjectsData['Area1']['data']);
+	   
+	     
+logText += "start recognition = " + getTime() + "\n";
+
+
+					//Розпаралеленя 
 						//обробка зображенння
 						//сегментація
 						//налаштування нейронної мережі та розпізнавання обєктів
 						//формування вихідного результату
 					//повернення або друк масиву знайдених обєктів
-	      	 
-      		}
-    	});
-  	});	
 
-	 
+logText += "End recognitio = " + getTime() + "\n";
+
+
+ 
+logText += "End process " + getTime() + "\n";
+//document.getElementById('outDataTextera').text = logText;
+$('#outDataTextera').val( logText);
+            }
+        }
+    });
 
 }
+
+
+
+
+
+
+
+
+ 
