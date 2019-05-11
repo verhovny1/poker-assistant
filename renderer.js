@@ -7,17 +7,16 @@ const { ipcRenderer, remote } = require('electron');
 	const desktopCapturer = electron.desktopCapturer;
 	const electronScreen = electron.screen; 
 	const shell = electron.shell;
- 
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
 
+const brain = require('brain.js');
 const functions = require('./functions.js');
 	let isWork = false;
 	let percentageIncreaseSize = 1;
 	let logText = "";
  
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-
 
 
 function getWindows()
@@ -222,29 +221,28 @@ logText += "Start = " + getTime() + "\n";
 				//отримуємо розміри та бітмап зображення
 				let siz = sources[i].thumbnail.getSize();
 				let bitmap = sources[i].thumbnail.getBitmap(); //.slice(0, siz.width * siz.height * 4);	
-
- 
 logText += "get bitmap = " + getTime() + "\n";
-
-				bitmap = functions.binarize( bitmap , 2 );
-
-logText += "binarize bitmap = " + getTime() + "\n";
-
- 				//перетворюємо його в 2Д масив
+			
+				//перетворюємо bitmap в 2Д масив
 	      		let data = functions.getRGB2dArr( bitmap, siz.width, siz.height);
-
-
-
 logText += "convert to 2D arr = " + getTime() + "\n";
+functions.setArrToCanvas( data , "canvas1");	
+ 
+/*
+ 				//Розмиваємо
+				data = functions.blurryColorImg(data,  1, "averaging-to-new" );
+logText += "get blurry = " + getTime() + "\n";
+functions.setArrToCanvas( data , "canvas2");	
 
-		      		
-		      		//console.log(odjectsData); 
+				//Бінаризуємо
+				data = functions.binarize( data , 4, 2,140 );
+logText += "binarize bitmap = " + getTime() + "\n";
+functions.setArrToCanvas( data , "canvas3");
+ 				*/
+		      		    		 
 		      		let playersCount = odjectsData['playersCount']; //кількість гравців
-	      			//console.log(playersCount); 
-	      			
 
 	      			//вирізать з зображення обєкти
-
 	      			for (var i = 1; i <= playersCount*2+1; i++) 
 	      			{
 	      				let area = odjectsData['Area'+i.toString() ];
@@ -252,15 +250,41 @@ logText += "convert to 2D arr = " + getTime() + "\n";
 	      				odjectsData['Area'+i.toString() ]['data'] = areaData;
 			
 	      			}
-
 logText += "gets areas from img = " + getTime() + "\n";
 
- 
-	      			console.log(odjectsData['Area1']['data']);
-	   
-	     
-logText += "start recognition = " + getTime() + "\n";
 
+logText += "start recognition = " + getTime() + "\n"; 
+	      			let dataArr = odjectsData['Area1']['data'];
+functions.setArrToCanvas( dataArr , "canvas2");
+
+	 
+					dataArr = functions.blurryColorImg(dataArr,  1, "averaging-to-new" );
+logText += "get blurry = " + getTime() + "\n";
+functions.setArrToCanvas( dataArr , "canvas3");
+
+				dataArr = functions.binarize( dataArr , 4, 2, 128 );
+logText += "binarize  = " + getTime() + "\n";
+functions.setArrToCanvas( dataArr , "canvas4");
+
+				let dataArr16x16 = functions.resampleSingleArr(dataArr, 16, 16);
+logText += "resample  = " + getTime() + "\n";
+functions.setArrToCanvas( dataArr16x16 , "canvas5");
+
+	   				/*let dataArrBl1 = functions.blurryColorImg(dataArr, 2, "averaging");
+	   					functions.setArrToCanvas( dataArrBl1 , "canvas2");
+	   				let dataArrBl2 = functions.blurryColorImg(dataArr, 2, "averaging-to-new");
+	   					functions.setArrToCanvas( dataArrBl2 , "canvas3");
+	   				dataArr = functions.binarize( dataArr, 1 , 2 );
+	   					functions.setArrToCanvas( dataArr , "canvas4");
+	   				dataArrBl1 = functions.binarize( dataArr, 1 , 2 );
+	   					functions.setArrToCanvas( dataArrBl1 , "canvas5");
+	   				dataArrBl2 = functions.binarize( dataArr, 1 , 2 );
+	   					functions.setArrToCanvas( dataArrBl2 , "canvas6");*/
+
+	     
+
+
+					
 
 					//Розпаралеленя 
 						//обробка зображенння
@@ -274,7 +298,6 @@ logText += "End recognitio = " + getTime() + "\n";
 
  
 logText += "End process " + getTime() + "\n";
-//document.getElementById('outDataTextera').text = logText;
 $('#outDataTextera').val( logText);
             }
         }

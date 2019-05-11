@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.3.1",
+    "brain.js": "^1.6.1",
     "capture-electron": "^3.0.1",
     "electron-modal": "^1.0.0",
     "electron-screenshot-app": "^4.0.3",
