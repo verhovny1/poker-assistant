@@ -197,12 +197,13 @@ function mainRecognition( )
 {
 	//одержуємо данні обєктів
 	let odjectsData = readConfig();
+	let windowsSelect = document.getElementById('windowsSelect');
+	let selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;
+
 logText = "";
 logText += "Start = " + getTime() + "\n";
 
-
-	let windowsSelect = document.getElementById('windowsSelect');
- 	let selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;
+ 	
  	let thumbSize = determinaScreenShot( percentageIncreaseSize );
 	let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
 	let bitmap = [];
@@ -239,8 +240,9 @@ functions.setArrToCanvas( data , "canvas2");
 logText += "binarize bitmap = " + getTime() + "\n";
 functions.setArrToCanvas( data , "canvas3");
  				*/
-		      		    		 
-		      		let playersCount = odjectsData['playersCount']; //кількість гравців
+
+	      		    		 
+		      	let playersCount = odjectsData['playersCount']; //кількість гравців
 
 	      			//вирізать з зображення обєкти
 	      			for (var i = 1; i <= playersCount*2+1; i++) 
@@ -266,9 +268,26 @@ functions.setArrToCanvas( dataArr , "canvas3");
 logText += "binarize  = " + getTime() + "\n";
 functions.setArrToCanvas( dataArr , "canvas4");
 
-				let dataArr16x16 = functions.resampleSingleArr(dataArr, 16, 16);
+				let findObjects = functions.segmentationArrayPixelscan( dataArr );
+logText += "segmentation  = " + getTime() + "\n";
+console.log( findObjects );
+console.log( findObjects[1].data2dAr );
+functions.setArrToCanvas( findObjects[1].data2dAr , "canvas5");
+
+
+				let dataArr16x16 = functions.resampleSingleArr(findObjects[1].data2dAr, 16, 16);
 logText += "resample  = " + getTime() + "\n";
-functions.setArrToCanvas( dataArr16x16 , "canvas5");
+console.log( dataArr16x16 );
+functions.setArrToCanvas( dataArr16x16 , "canvas6");
+
+				//проводимо бiнаризацію масиву
+                let bin16x16 = functions.binarizeArray(dataArr16x16,127);
+logText += "binarizeArray  = " + getTime() + "\n";
+console.log( bin16x16 );            
+                //конвертуємо масив в одномірний
+                var bin256 = functions.C2Dto1D(bin16x16);
+logText += "C2Dto1D  = " + getTime() + "\n";
+console.log( bin256 );      
 
 	   				/*let dataArrBl1 = functions.blurryColorImg(dataArr, 2, "averaging");
 	   					functions.setArrToCanvas( dataArrBl1 , "canvas2");

@@ -18,9 +18,9 @@ exports.getRGB2dArr = function(arr,w,h)
         SummMass = []; // проміжний масив-строка 
         for (var n = 0; n < w  ; n++) {
             var MY_RGBA = {}; // проміжний обєкт для запису свойств
-            MY_RGBA.R = arr[counter];
+            MY_RGBA.B = arr[counter];
             MY_RGBA.G = arr[counter + 1];
-            MY_RGBA.B = arr[counter + 2];
+            MY_RGBA.R = arr[counter + 2];
             MY_RGBA.A = arr[counter + 3];
             SummMass[n] = MY_RGBA;
             counter += 4;
@@ -53,6 +53,40 @@ exports.set2dArrRGB = function(arr)
     return retArr;
 }
  
+
+//Функція конвертації 1д масиву в 2д. на вході масив і ширина та висота вихідного масиву
+exports.C1Dto2D = function ( A1D,n,m )
+{
+    var num = 0;
+    var A2D = new Array();
+
+    for( var i = 0; i < n; i++)
+    {
+        A2D[i] = new Array();
+        for ( var j = 0; j < m; j++)
+        {
+            A2D[i][j] = A1D[num];
+            num++;
+        }
+    }
+
+    return A2D;
+}
+//функція конвертації 2д масиву в 1д. на вході 2д масив, на виході 1д масив.
+exports.C2Dto1D = function( arr )
+{
+    var retAr = [];
+
+    for (var k = 0; k < arr.length; k++) 
+    {
+        for (var p = 0; p < arr[k].length; p++) 
+        {
+            retAr[ arr.length * k + p] = arr[k][p];
+        }
+    }  
+
+    return retAr;
+}
 //Функція для вирізання 2Д масиву
 exports.slice2dArr = function( arr , arg )
 {
@@ -210,6 +244,28 @@ exports.binarize = function ( data, metod = 1, typeArr = 1, setingPorog = 128 )
     return data;
 }
 
+//повертає масив 0 та 1
+exports.binarizeArray = function(arr, porog = 127)
+{
+    var retArr = [];
+
+    for (var i = 0; i < arr.length; i++) 
+    {
+        var rA = [];
+        for (var n = 0; n < arr[i].length; n++) 
+        {
+            if( (arr[i][n].R + arr[i][n].G + arr[i][n].B ) / 3 > porog )
+            {
+                rA[n] = 1;
+            }
+            else  rA[n] = 0;
+        }
+
+        retArr[i] = rA;
+    }
+
+    return retArr;
+}
 
 
 
@@ -392,179 +448,102 @@ exports.resampleSingleArr = function(arr, width, height)
     return this.getRGB2dArr(data2,width,height);
 }
 
-
-
-//Формує масив обєктів з координатами верху,низу,ліво,право типу findObjects[№ обєкта]top та масиву координат пікселей X,Y типу findObjects[№ обєкта].obg[№ пікселя].X
-//На вході масив типу A[][].R де R може бути R,G,B,A 
-exports.segmentationArrayPixelscan = function (arr, metod = "all")
-{
-    var H = arr.length; 
-    var W = arr[0].length;
-
-    //створюємо масив показуючий наявність пікселя
-    var isEmpty = new Array();
-    for (i=0;i<H;i++){
-        wr = new Array();
-        for (n=0;n<W;n++){
-            wr[n] = true;
-        }
-        isEmpty[i] = wr;
-    }
-    
-    var findObjects = new Array();//масив для знайдених обєктів
-    //тепер пройдемося по кажному пікселю зображення
-    for (i = 0; i < H; i++)//згори до низу
-    {
-        for (n = 0; n < W; n++)//зліва на право
-        {
-            
-            //якщо піксель не існує
-            if (isEmpty[i][n] == false) { }
-            //якщо піксель існує і він білий - пропускаємо, видаляючи піксель
-            else if (isEmpty[i][n] == true && arr[i][n].R != 0)
-            {
-                isEmpty[i][n] = false;
-            }
-            //якщо піксель існує і він чорного кольору - виявлено обєкт - починаємо виявляти всі його піксклі
-            else if (isEmpty[i][n] == true && arr[i][n].R == 0)
-            {
-                //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
-                var newObj = {};
-                newObj.X = n;
-                newObj.Y = i;
-                var buf = new Array();//буфер для пікселів
-                buf[0] = newObj;
-                bufCount = 1;
-                isEmpty[i][n] = false;//видаляємо з існуючих
-                 
-                var objPixels = new Array();
-                //доки в буфері є елементи
-                while (bufCount > 0)
-                {
-                     
-                    //перевіряємо сусідні пікселі, якщо вони чорні і існують - додаємо у буфер
-                    if (metod == "all")
-                    {
-                        for (My = buf[0].Y - 1  ; My <= buf[0].Y + 1 ; My++)
-                            for (Mx = buf[0].X - 1  ; Mx <= buf[0].X + 1 ; Mx++)
-                                if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R == 0 && isEmpty[My][Mx] == true) //якщо піксель в межах зображення і чорний і існує - записуємо його в буфер
-                                {
-                                    newObj2 = {};
-                                    newObj2.X = Mx;
-                                    newObj2.Y = My;
-                                    buf[bufCount] = newObj2;
-                                    bufCount++;
-                                    isEmpty[My][Mx] = false;
-                                }
-                    }
-                    else if (metod == "straight")
-                    {
-
-                    }
-                    else if (metod == "diagonal")
-                    {
  
-                    }
-                    
 
-                     
-                    //Записуємо поточний піксель і масив пікселей обєкта, видаляємо його з існуючих та з буфера
-                    objPixels[objPixels.length] = buf[0];
-                    //isEmpty[ buf[0].Y ][ buf[0].X ] = false;
-                    for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
-                    bufCount--;
-                }
-
-                //маючи масив пікселей обєкта: знаходимо maxX,minX,maxY,minY та все записюємо у масив обєктів
-                maxX = objPixels[0].X;
-                minX = objPixels[0].X;
-                maxY = objPixels[0].Y;
-                minY = objPixels[0].Y;
-                for (a = 0; a < objPixels.length; a++)
-                {
-                    if (objPixels[a].X > maxX) maxX = objPixels[a].X;
-                    if (objPixels[a].X < minX) minX = objPixels[a].X;
-                    if (objPixels[a].Y > maxY) maxY = objPixels[a].Y;
-                    if (objPixels[a].Y < minY) minY = objPixels[a].Y;
-                }
-                newObj2 = {};
-                newObj2.left = minX;
-                newObj2.right = maxX;
-                newObj2.top = minY;
-                newObj2.bottom = maxY;
-                newObj2.obg = objPixels;
-                findObjects[findObjects.length] = newObj2;
-            }        
-
-        }
+function get2dArFromArrPixels( objPixels )
+{
+    //маючи масив пікселей обєкта: знаходимо maxX,minX,maxY,minY та все записюємо у масив обєктів
+    let maxX = objPixels[0].X;
+    let minX = objPixels[0].X;
+    let maxY = objPixels[0].Y;
+    let minY = objPixels[0].Y;
+    for (let a = 0; a < objPixels.length; a++)
+    {
+        if (objPixels[a].X > maxX) maxX = objPixels[a].X;
+        if (objPixels[a].X < minX) minX = objPixels[a].X;
+        if (objPixels[a].Y > maxY) maxY = objPixels[a].Y;
+        if (objPixels[a].Y < minY) minY = objPixels[a].Y;
     }
 
-    /*document.write("Знайдені обєкти:");
-    for (i = 0; i < findObjects.length; i++) {
-        document.write("<br>Обєкт№" + (i + 1) + "<br>");
-        document.write("<br>left=" + findObjects[i].left + " right=" + findObjects[i].right + " top=" + findObjects[i].top + " bottom=" + findObjects[i].bottom+"<br>");
-
-        for (n = 0; n < findObjects[i].obg.length; n++) {
-            
-            document.write("(" + findObjects[i].obg[n].X + "," + findObjects[i].obg[n].Y + ")");
-        }
-
-    }*/
-    
-    /*document.write("Знайдені обєкти:");
-    for (i = 0; i < findObjects.length; i++)
+    //створюємо зображення (чорний(0) - позначає обєкт, білий 255 - пустий простір)
+    let data2dAr = []; 
+    let count1 = 0;
+    for (let a = minY; a <= maxY ; a++) 
     {
-        document.write("<br>Обєкт№" + (i + 1) + "<br>пікселі:");
-        for (n = 0; n < findObjects[i].length; n++)
+        let dat2d = [];
+        let count2 = 0;
+        for (var b = minX; b <= maxX; b++) 
         {
-            document.write("(" + findObjects[i][n].X + "," + findObjects[i][n].Y+")");
+            let newObj = {};
+            newObj.R = 255;
+            newObj.G = 255;
+            newObj.B = 255;
+            newObj.A = 255;
+
+            for (var g = 0; g < objPixels.length; g++) 
+                if( objPixels[g].X == b && objPixels[g].Y == a) 
+                {
+                    newObj.R = 0;
+                    newObj.G = 0;
+                    newObj.B = 0;
+                    newObj.A = 255;
+                }
+
+            dat2d[count2] = newObj;
+            count2 ++; 
         }
-
-    }*/
-
-    return findObjects;
+        data2dAr[count1] = dat2d;
+        count1++;
+    }
+ 
+    return {  data2dAr:data2dAr, top:minY, bottom:maxY, left:minX, right:maxX };
 }
 
-
-exports.segmentationArrayPixelscan = function (arr )
+//сегментация
+exports.segmentationArrayPixelscan = function ( arr )
 {
     let H = arr.length; 
     let W = arr[0].length;
 
     //створюємо масив показуючий наявність пікселя
-    let isEmpty = new Array();
-    for (i=0;i<H;i++)
+    let isExist = new Array();
+    for (var i=0; i<H; i++)
     {
         let wr = [];
-        for (n=0;n<W;n++) wr[n] = true;    
-        isEmpty[i] = wr;
+        for (var n=0; n<W; n++) wr[n] = true;    
+        isExist[i] = wr;
     }
     
     let findObjects = new Array();//масив для знайдених обєктів
 
     //тепер пройдемося по кажному пікселю зображення
-    for (i = 0; i < H; i++)//згори до низу
+    for ( var i = 0; i < H; i++)//згори до низу
     {
-        for (n = 0; n < W; n++)//зліва на право
-        {
-            
+        for (var n = 0; n < W; n++)//зліва на право
+        { 
             //якщо піксель не існує
-            if (isEmpty[i][n] == false) { }
-            //якщо піксель існує і він білий - пропускаємо, видаляючи піксель
-            else if (isEmpty[i][n] == true && arr[i][n].R != 0)
+            if (isExist[i][n] == false) { }
+
+            /*
+            else if (isExist[i][n] == true && arr[i][n].R != 0)
             {
-                //isEmpty[i][n] = false;
-            }
+                isExist[i][n] = false;
+            } */
+
             //якщо піксель існує і він чорного кольору - виявлено обєкт - починаємо виявляти всі його піксклі
-            else if (isEmpty[i][n] == true && arr[i][n].R == 0)
+            else if (isExist[i][n] == true && arr[i][n].R == 0)
             {
                 //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
                 var buf = new Array();//буфер для пікселів
-                buf[0] = { X:n, Y:i }
-                bufCount = 1;
-                isEmpty[i][n] = false;//видаляємо з існуючих
+                    var newObj = {};
+                    newObj.X = n;
+                    newObj.Y = i;
+                    buf[0] = newObj //записуємо 1-й елемент в буфер
+                    bufCount = 1;   //кількість в буфері = 1
+                    isExist[i][n] = false;//видаляємо його з існуючих
                  
-                var objPixels = new Array();
+                var objPixels = new Array();//масив пікселів
+
                 //доки в буфері є елементи
                 while (bufCount > 0)
                 {           
@@ -572,55 +551,52 @@ exports.segmentationArrayPixelscan = function (arr )
                     //перевіряємо сусідні пікселі, якщо вони чорні і існують - додаємо у буфер
                     for (My = buf[0].Y - 1  ; My <= buf[0].Y + 1 ; My++)
                         for (Mx = buf[0].X - 1  ; Mx <= buf[0].X + 1 ; Mx++)
-                            if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R == 0 && isEmpty[My][Mx] == true) //якщо піксель в межах зображення і чорний і існує - записуємо його в буфер
+                            if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R == 0 && isExist[My][Mx] == true) //якщо піксель в межах зображення і чорний і існує - записуємо його в буфер
                             {
- 
-                                buf[bufCount] = { X:Mx, Y:My }
+
+                                var newObj = {};
+                                newObj.X = Mx;
+                                newObj.Y = My;
+                                buf[bufCount] = newObj;
                                 bufCount++;
-                                isEmpty[My][Mx] = false;
+                                isExist[My][Mx] = false;
                             }
               
                      
                     //Записуємо поточний піксель і масив пікселей обєкта, видаляємо його з існуючих та з буфера
                     objPixels[objPixels.length] = buf[0];
                  
-                    for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
+                    buf = buf.slice(1, bufCount);
+                    //for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
                     bufCount--;
                 }
 
 
+                let data =  get2dArFromArrPixels( objPixels );
 
-
-                //маючи масив пікселей обєкта: знаходимо maxX,minX,maxY,minY та все записюємо у масив обєктів
-                maxX = objPixels[0].X;
-                minX = objPixels[0].X;
-                maxY = objPixels[0].Y;
-                minY = objPixels[0].Y;
-                for (a = 0; a < objPixels.length; a++)
-                {
-                    if (objPixels[a].X > maxX) maxX = objPixels[a].X;
-                    if (objPixels[a].X < minX) minX = objPixels[a].X;
-                    if (objPixels[a].Y > maxY) maxY = objPixels[a].Y;
-                    if (objPixels[a].Y < minY) minY = objPixels[a].Y;
-                }
                 newObj2 = {};
-                newObj2.left = minX;
-                newObj2.right = maxX;
-                newObj2.top = minY;
-                newObj2.bottom = maxY;
-                newObj2.obg = objPixels;
-                findObjects[findObjects.length] = newObj2;
+                newObj2.left = data.left;
+                newObj2.right = data.right;
+                newObj2.top = data.top;
+                newObj2.bottom = data.bottom;
+                //newObj2.obg = objPixels;  
+                newObj2.data2dAr = data.data2dAr;
+                findObjects[findObjects.length] = newObj2;  
             }   
 
+
             //якщо піксель існує і він білий кольору - виявлено обєкт - починаємо виявляти всі його піксклі
-            else if ( isEmpty[i][n] == true && arr[i][n].R != 0 )
+            else if ( isExist[i][n] == true && arr[i][n].R != 0 )
             {
                 //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
                 let buf = new Array();//буфер для пікселів
-                    buf[0] = { X:n, Y:i };
+                    var newObj = {};
+                    newObj.X = n;
+                    newObj.Y = i;
+                    buf[0] = newObj //записуємо 1-й елемент в буфер
                 bufCount = 1;
-                isEmpty[i][n] = false;//видаляємо з існуючих
-                 
+                isExist[i][n] = false;//видаляємо з існуючих
+                  
                 var objPixels = new Array();
                 //доки в буфері є елементи
                 while (bufCount > 0)
@@ -629,40 +605,35 @@ exports.segmentationArrayPixelscan = function (arr )
                     //перевіряємо сусідні пікселі, якщо вони чорні і існують - додаємо у буфер
                     for (My = buf[0].Y - 1  ; My <= buf[0].Y + 1 ; My++)
                         for (Mx = buf[0].X - 1  ; Mx <= buf[0].X + 1 ; Mx++)
-                            if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R != 0 && isEmpty[My][Mx] == true) //якщо піксель в межах зображення і білий і існує - записуємо його в буфер
+                            if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R != 0 && isExist[My][Mx] == true) //якщо піксель в межах зображення і білий і існує - записуємо його в буфер
                             {
-                                buf[bufCount] = { X:Mx, Y:My };
+                                var newObj = {};
+                                newObj.X = Mx;
+                                newObj.Y = My;
+                                buf[bufCount] = newObj;
                                 bufCount++;
-                                isEmpty[My][Mx] = false;
+                                isExist[My][Mx] = false;
                             }           
                      
                     //Записуємо поточний піксель і масив пікселей обєкта, видаляємо його з існуючих та з буфера
                     objPixels[objPixels.length] = buf[0];
                  
-                    for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
+                    buf = buf.slice(1, bufCount);
+                    //for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
                     bufCount--;
                 }
           
 
-                //маючи масив пікселей обєкта: знаходимо maxX,minX,maxY,minY та все записюємо у масив обєктів
-                maxX = objPixels[0].X;
-                minX = objPixels[0].X;
-                maxY = objPixels[0].Y;
-                minY = objPixels[0].Y;
-                for (a = 0; a < objPixels.length; a++)
-                {
-                    if (objPixels[a].X > maxX) maxX = objPixels[a].X;
-                    if (objPixels[a].X < minX) minX = objPixels[a].X;
-                    if (objPixels[a].Y > maxY) maxY = objPixels[a].Y;
-                    if (objPixels[a].Y < minY) minY = objPixels[a].Y;
-                }
+                let data =  get2dArFromArrPixels( objPixels );
+
                 newObj2 = {};
-                newObj2.left = minX;
-                newObj2.right = maxX;
-                newObj2.top = minY;
-                newObj2.bottom = maxY;
-                newObj2.obg = objPixels;
-                findObjects[findObjects.length] = newObj2;
+                newObj2.left = data.left;
+                newObj2.right = data.right;
+                newObj2.top = data.top;
+                newObj2.bottom = data.bottom;
+                //newObj2.obg = objPixels;  
+                newObj2.data2dAr = data.data2dAr;
+                findObjects[findObjects.length] = newObj2;  
             }        
 
 
@@ -671,6 +642,5 @@ exports.segmentationArrayPixelscan = function (arr )
     }
 
  
-
     return findObjects;
 }
