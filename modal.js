@@ -16,7 +16,7 @@ let bitmapH = null;
 
 const functions = require('./functions.js');
 let activeObject = null;
-let odjectsData = [];
+let odjectsData = {};
 
 //функція отримання поввідомлень (bitmap зображення)
 ipcRenderer.on('bitmap', (event, arg) => {
@@ -116,7 +116,7 @@ function loadPlayers( count = 5 )
 				//for (var key in odjectsData) {  console.log(odjectsData[key]) }; 
 
 				let data = odjectsData[ activeObject.id ];
-				setArrToCanvas( bitmap, bitmapW,bitmapH , "modalCanv", { x1: data["left"] , y1: data.top ,x2:data.right ,y2:data.bottom } );
+				setArrToCanvas( bitmap, bitmapW,bitmapH , "modalCanv", { x1: data.left , y1: data.top ,x2:data.right ,y2:data.bottom } );
 
 			}
 			else 
@@ -221,52 +221,11 @@ modalCanv.addEventListener("mousemove", function(event)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 function readConfig()
 {
-	fs.readFile("config.tx", function(err, buf) {
-	 	str = buf.toString();
-	  	var res = str.split("\n");
-	  	
-	  	let playersCount = res[0].replace( "playersCount:", "");
-	  	playersCount = parseInt( playersCount, 10 );
-		odjectsData['playersCount'] =  playersCount;
-		
-		let counter = 1;
-		for (var i = 1; i < res.length ; i+=7) 
-		{
-			let obj = {};
-			obj.id = res[i+1].replace( "id:", "");
-			obj.type = res[i+2].replace( "type:", "");
-			obj.left = res[i+3].replace( "left:", "");
-			obj.top = res[i+4].replace( "top:", "");
-			obj.right = res[i+5].replace( "right:", "");
-			obj.bottom = res[i+6].replace( "bottom:", "");
-
-			odjectsData[ res[i].toString() ] = obj;
-		}
-	});
+	const config = require('./config.js');
+	odjectsData = config.getConfig();
 }
 function writeConfig()
 {
-	let text = "";
-	let pCount = odjectsData['playersCount'];
-	text +=  "playersCount:"+ odjectsData['playersCount'];
-	//for (var i = 1; i <= pCount*2+1; i++) 
-	for (var i = 1; i <= 10*2+1; i++) 
-	{
-		text  += "\nArea"+i.toString();
-		let data = odjectsData["Area"+i.toString()];
-		text  += "\nid:" + data["id"];
-		text  += "\ntype:" + data["type"];
-		text  += "\nleft:" + data["left"];
-		text  += "\ntop:" + data["top"];
-		text  += "\nright:" + data["right"];
-		text  += "\nbottom:" + data["bottom"];
-	}
-
-
-	fs.writeFile("config.tx", text, function(err) {
-	    if(err) {
-	        return console.log(err);
-	    }
-	}); 
-
+	const config = require('./config.js');
+	config.setConfig( odjectsData ) ;
 }

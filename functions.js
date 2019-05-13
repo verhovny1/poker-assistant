@@ -524,25 +524,19 @@ exports.segmentationArrayPixelscan = function ( arr )
             //якщо піксель не існує
             if (isExist[i][n] == false) { }
 
-            /*
-            else if (isExist[i][n] == true && arr[i][n].R != 0)
-            {
-                isExist[i][n] = false;
-            } */
-
             //якщо піксель існує і він чорного кольору - виявлено обєкт - починаємо виявляти всі його піксклі
             else if (isExist[i][n] == true && arr[i][n].R == 0)
             {
                 //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
-                var buf = new Array();//буфер для пікселів
-                    var newObj = {};
+                let buf = new Array();//буфер для пікселів
+                    let newObj = {};
                     newObj.X = n;
                     newObj.Y = i;
                     buf[0] = newObj //записуємо 1-й елемент в буфер
                     bufCount = 1;   //кількість в буфері = 1
                     isExist[i][n] = false;//видаляємо його з існуючих
                  
-                var objPixels = new Array();//масив пікселів
+                let objPixels = new Array();//масив пікселів
 
                 //доки в буфері є елементи
                 while (bufCount > 0)
@@ -554,7 +548,7 @@ exports.segmentationArrayPixelscan = function ( arr )
                             if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R == 0 && isExist[My][Mx] == true) //якщо піксель в межах зображення і чорний і існує - записуємо його в буфер
                             {
 
-                                var newObj = {};
+                                let newObj = {};
                                 newObj.X = Mx;
                                 newObj.Y = My;
                                 buf[bufCount] = newObj;
@@ -590,14 +584,14 @@ exports.segmentationArrayPixelscan = function ( arr )
             {
                 //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
                 let buf = new Array();//буфер для пікселів
-                    var newObj = {};
+                    let newObj = {};
                     newObj.X = n;
                     newObj.Y = i;
                     buf[0] = newObj //записуємо 1-й елемент в буфер
                 bufCount = 1;
                 isExist[i][n] = false;//видаляємо з існуючих
                   
-                var objPixels = new Array();
+                let objPixels = new Array();
                 //доки в буфері є елементи
                 while (bufCount > 0)
                 {           
@@ -607,7 +601,7 @@ exports.segmentationArrayPixelscan = function ( arr )
                         for (Mx = buf[0].X - 1  ; Mx <= buf[0].X + 1 ; Mx++)
                             if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R != 0 && isExist[My][Mx] == true) //якщо піксель в межах зображення і білий і існує - записуємо його в буфер
                             {
-                                var newObj = {};
+                                let newObj = {};
                                 newObj.X = Mx;
                                 newObj.Y = My;
                                 buf[bufCount] = newObj;
