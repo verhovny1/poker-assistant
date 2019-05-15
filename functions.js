@@ -582,6 +582,11 @@ exports.segmentationArrayPixelscan = function ( arr )
             //якщо піксель існує і він білий кольору - виявлено обєкт - починаємо виявляти всі його піксклі
             else if ( isExist[i][n] == true && arr[i][n].R != 0 )
             {
+                isExist[i][n] == false;
+            }
+/*
+            else if ( isExist[i][n] == true && arr[i][n].R != 0 )
+            {
                 //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
                 let buf = new Array();//буфер для пікселів
                     let newObj = {};
@@ -629,7 +634,7 @@ exports.segmentationArrayPixelscan = function ( arr )
                 newObj2.data2dAr = data.data2dAr;
                 findObjects[findObjects.length] = newObj2;  
             }        
-
+*/
 
 
         }

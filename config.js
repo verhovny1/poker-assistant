@@ -1,5 +1,6 @@
 // module variables
 const config = require('./config.json');
+const simbolsNet = require('./simbolsNet.json');
 
 exports.setConfig = function( obj )
 {
@@ -18,4 +19,9 @@ exports.setConfig = function( obj )
 exports.getConfig = function()
 {
 	return config;
+}
+
+exports.getSimbolsNet = function()
+{
+	return simbolsNet;
 }
