@@ -1,6 +1,4 @@
 // module variables
-const config = require('./config.json');
-const simbolsNet = require('./simbolsNet.json');
 
 exports.setConfig = function( obj )
 {
@@ -16,12 +14,27 @@ exports.setConfig = function( obj )
 
 }
 
+ 
 exports.getConfig = function()
 {
-	return config;
+	/*
+	let config = new require('./config.json');
+	return config; 
+	*/
+	var Httpreq = new XMLHttpRequest(); // a new request
+    Httpreq.open("GET",'./config.json',false);
+    Httpreq.send(null);
+    return  JSON.parse(  Httpreq.responseText );   
 }
 
-exports.getSimbolsNet = function()
+exports.getNet = function( name )
 {
-	return simbolsNet;
+	/*
+	let netWork = require('./'+name+'.json');
+	return netWork;*/
+
+	var Httpreq = new XMLHttpRequest(); // a new request
+    Httpreq.open("GET",'./'+name+'.json',false);
+    Httpreq.send(null);
+    return  JSON.parse(  Httpreq.responseText ); 
 }

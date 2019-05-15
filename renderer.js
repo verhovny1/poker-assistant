@@ -13,7 +13,7 @@ const path = require('path')
 
 const brain = require('brain.js');
 const functions = require('./functions.js');
-const conf = require('./config.js');
+
 
 	let isWork = false;
 	let percentageIncreaseSize = 1;
@@ -168,8 +168,7 @@ startAppWork.addEventListener('click', function(event)
 	//timerApp();
 });
 
-
-//запуск рооти програми
+ 
 const stopAppWor = document.getElementById('stopAppWorkBtn');
 stopAppWor.addEventListener('click', function(event)
 {
@@ -177,7 +176,7 @@ stopAppWor.addEventListener('click', function(event)
 	isWork = false;
 });
 
-//запуск рооти програми
+ 
 const exitApp = document.getElementById('exitAppBtn');
 exitApp.addEventListener('click', function(event)
 {
@@ -231,6 +230,14 @@ function readConfig()
 	return odjectsData;
 }
 
+function getNetwork( netName )
+{
+	const config = require('./config.js');
+	odjectsData = config.getNet( netName );
+
+	return odjectsData;
+}
+
 function getTime()
 {
 	let today = new Date();
@@ -247,12 +254,12 @@ function getTime()
 function mainRecognition( )
 {
 	//одержуємо данні обєктів
-	let odjectsData = readConfig();
+	let odjectsData = readConfig(); 
 	let playersCount = odjectsData['playersCount']; //кількість гравців
+	
 
-
-	let SimbolsNet = conf.getSimbolsNet();
-	let outputArr = ["A","K","Q","J","0","1","2","3","4","5","6","7","8","9","D","C","H","P","_"];
+	let SimbolsNet = getNetwork("simbolsNet");
+	let outputArr = ["A","K","Q","J","0","1","2","3","4","5","6","7","8","9","Daisy","Cross","Hearts","Peak","_"];
 	//створюємо екземпляр мережі
     var net = new brain.NeuralNetwork();
 	net.fromJSON(  SimbolsNet);  
@@ -272,7 +279,7 @@ logText += "Start = " + getTime() + "\n";
 	let data = functions.getRGB2dArr( bitmap, siz.width, siz.height);
 	logText += "convert to 2D arr = " + getTime() + "\n";
 	//functions.setArrToCanvas( data , "canvas1");	
- 
+ 	
 
 
 logText += "start recognition = " + getTime() + "\n"; 	      		    		 
@@ -282,48 +289,48 @@ logText += "start recognition = " + getTime() + "\n";
 	{
 		let area = odjectsData['Area'+i.toString() ];
 		
- 		if ( area.type == "cardsOnTable" /* || area.type == "CardsOfPlayer1" */)
+ 		if ( area.type == "cardsOnTable"  || area.type == "CardsOfPlayer1" )
  		{
 
 			let dataArr = functions.slice2dArr( data, area ); 
 			logText += "get areas from img = " + getTime() + "\n";
- 			functions.setArrToCanvas( dataArr , "canvas2");
+ 			//functions.setArrToCanvas( dataArr , "canvas2");
 	 
 			dataArr = functions.blurryColorImg(dataArr,  1, "averaging-to-new" );
 			logText += "get blurry = " + getTime() + "\n";
-			functions.setArrToCanvas( dataArr , "canvas3");
+			//functions.setArrToCanvas( dataArr , "canvas3");
 
 			dataArr = functions.binarize( dataArr , 4, 2, 140 );
 			logText += "binarize  = " + getTime() + "\n";
-	 		functions.setArrToCanvas( dataArr , "canvas4");
+	 		//functions.setArrToCanvas( dataArr , "canvas4");
 
-			let findObjects = functions.segmentationArrayPixelscan( dataArr );
+	 		let findObjects = [];
+			findObjects = functions.segmentationArrayPixelscan( dataArr );
 			logText += "segmentation  = " + getTime() + "\n";
-			console.log(findObjects);
+			//console.log(findObjects);
 
 	 		findObjects = removeUnnecessaryObjects( findObjects, area.right-area.left, area.bottom-area.top );
-	 		console.log(findObjects);
+	 		//console.log(findObjects);
 
 	 		let recognSimv = []; let recCount = 0;	
 			for (var n = 0; n < findObjects.length; n++) 
 			{
 				let dataArr16x16 = functions.resampleSingleArr(findObjects[n].data2dAr, 16, 16);
-				functions.setArrToCanvas( dataArr16x16 , "canvas"+ (5+n).toString() );
-	//logText += "resample  obj" + n.toString() + ": " + getTime() + "\n";
+				//functions.setArrToCanvas( dataArr16x16 , "canvas"+ (5+n).toString() );
+				//logText += "resample  obj" + n.toString() + ": " + getTime() + "\n";
 
 				let bin16x16 = functions.binarizeArray(dataArr16x16,127);
-	//logText += "binarizeArray  obj" + n.toString() + ": " + getTime() + "\n";
+				//logText += "binarizeArray  obj" + n.toString() + ": " + getTime() + "\n";
 
 				var bin256 = functions.C2Dto1D(bin16x16);
-	//logText += "C2Dto1D  obj" + n.toString() + ": " + getTime() + "\n";
-	//console.log(bin256);
+				//logText += "C2Dto1D  obj" + n.toString() + ": " + getTime() + "\n";
+				//console.log(bin256);
 
 	 
 				var output = net.run( bin256 );
-	//console.log(output);
+				//console.log(output);
 
-	 			
-	 			
+	 			//отримуємо масив розпізнаних символів	 recognSimv
 	            var max = parseFloat( output[0] ) ; var maxPos = 0;
 	            for (var m = 0; m < outputArr.length ; m++) //for (var m = 0; m < output.length ; m++) - не работает с-чка
 	            {
@@ -333,8 +340,7 @@ logText += "start recognition = " + getTime() + "\n";
 	                    maxPos = m;
 	                }
 	            }
-
-	            if (max > 0.5) 
+	            if (max > 0.8) 
 	            {
 	        		let ob = {};
 	        		ob.simv = outputArr[maxPos];
@@ -343,25 +349,24 @@ logText += "start recognition = " + getTime() + "\n";
 	        		ob.left = findObjects[n].left;
 	        		ob.right = findObjects[n].right;
 	        		ob.bottom = findObjects[n].bottom;
+	        		ob.isEnable = true;
 	        		recognSimv[recCount] = ob;
 	        		recCount++;
 				}
 
 			}
-		
 			console.log(recognSimv);
 
-//ТУТ! розподіляємо обєкти на масті і номінали
-//Знаходимо для кожного номіналу найближчу масть
-//показуємо результат
+			//отримуємо масив знайдених карт
+			let cards = recCards(recognSimv);
+			console.log(cards);
 
-		let st = ""; 
-		for (var n = 0; n < recCount; n++)  st+="["+ recognSimv[n].simv + ":" + recognSimv[n].prob + "]";
-		logText += "find simbols:  " + st + " : " + getTime() + "\n";
+
+ 
+			logText += "find cards:  [" + cards.toString(); + "] : " + getTime() + "\n";
 
 		} 
 	}
-
 
 
 
@@ -383,7 +388,7 @@ $('#outDataTextera').val( logText);
  
 }
 
-
+ 
 
 function removeUnnecessaryObjects( findObjects, H , W )
 {
@@ -402,9 +407,7 @@ function removeUnnecessaryObjects( findObjects, H , W )
 
 		if ( width < W*0.5 && height < H*0.5 ) retArr[retArr.length] = findObjects[i];
 	}
-
 	//return retArr;
-
 
  	//Розподіляємо обэкти по рядам
 		//Знаходимо верхній обєкт і переміщаємо його в перед масиву. Створюємо масив значень (в рядку)
@@ -465,7 +468,84 @@ function removeUnnecessaryObjects( findObjects, H , W )
 }
 
 
+function recCards( recognSimv )
+{
+	let retCards = [];
 
+	for (var i = 0; i < recognSimv.length; i++)  if ( recognSimv[i].isEnable == true)
+	{
+		recognSimv[i].isEnable = false;
 
+		if ( inArr(recognSimv[i].simv, ["A","K","Q","J","0","3","4","5","6","7","8","9"] )   )
+		{		
+			let min = 100000;
+			let minPos = null;
 
- 
+			//шукаємо найближчу масть
+			for (var n = 0; n < recognSimv.length; n++)
+				if (i != n && inArr(recognSimv[n].simv, ["Daisy","Cross","Hearts","Peak"] ) && min > Math.abs(recognSimv[i].left - recognSimv[n].left)  )
+				{
+					min = Math.abs( recognSimv[i].left - recognSimv[n].left);
+					minPos = n;
+				}
+
+			if ( minPos != null)
+			{
+				recognSimv[minPos].isEnable = false;
+				retCards[retCards.length] = recognSimv[i].simv + ":" + recognSimv[minPos].simv;
+			} else retCards[retCards.length] = recognSimv[i].simv + ":";
+		}
+		else if ( inArr(recognSimv[i].simv, ["1","0"] ) == true )
+		{
+			//шукаємо спарений символ
+			let min = 10000;
+			let minPos = null;
+			if ( recognSimv[i].simv == "0")
+			{
+				for (var n = 0; n < recognSimv.length; n++)
+				if (i != n &&  recognSimv[n].simv == "1"  && min > Math.abs( recognSimv[i].left - recognSimv[n].left)  )
+				{
+					min = Math.abs( recognSimv[i].left - recognSimv[n].left);
+					minPos = n;
+				}
+			} else if ( recognSimv[i].simv == "1")
+			{
+				for (var n = 0; n < recognSimv.length; n++)
+				if (i != n &&  recognSimv[n].simv == "0"   && min > Math.abs( recognSimv[i].left - recognSimv[n].left)  )
+				{
+					min = Math.abs( recognSimv[i].left - recognSimv[n].left);
+					minPos = n;
+				}
+			} 
+			if ( minPos != null ) recognSimv[minPos].isEnable = false;
+			recognSimv[i].simv = "10";
+		
+			//шукаємо найближчу масть
+			min = 10000;
+			minPos = null;
+			for (var n = 0; n < recognSimv.length; n++)
+				if (i != n && inArr(recognSimv[n].simv, ["Daisy","Cross","Hearts","Peak"] ) && min > Math.abs( recognSimv[i].left - recognSimv[n].left)  )
+				{
+					min = Math.abs( recognSimv[i].left - recognSimv[n].left);
+					minPos = n;
+				}
+
+			if ( minPos != null)
+			{
+				recognSimv[minPos].isEnable = false;
+				retCards[retCards.length] = recognSimv[i].simv + ":" + recognSimv[minPos].simv;
+			} else retCards[retCards.length] = recognSimv[i].simv + ":";
+		}
+
+	}
+	
+	return retCards;
+}
+
+ function inArr( val, arr)
+ {
+ 	for (var i = 0; i < arr.length; i++) 
+ 		if (arr[i] == val) return true;
+
+ 	return false; 
+ }
