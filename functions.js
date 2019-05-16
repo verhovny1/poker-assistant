@@ -643,3 +643,97 @@ exports.segmentationArrayPixelscan = function ( arr )
  
     return findObjects;
 }
+
+
+
+
+exports.segmentationArrayPixelscanWite = function ( arr )
+{
+    let H = arr.length; 
+    let W = arr[0].length;
+
+    //створюємо масив показуючий наявність пікселя
+    let isExist = new Array();
+    for (var i=0; i<H; i++)
+    {
+        let wr = [];
+        for (var n=0; n<W; n++) wr[n] = true;    
+        isExist[i] = wr;
+    }
+    
+    let findObjects = new Array();//масив для знайдених обєктів
+
+    //тепер пройдемося по кажному пікселю зображення
+    for ( var i = 0; i < H; i++)//згори до низу
+    {
+        for (var n = 0; n < W; n++)//зліва на право
+        { 
+            //якщо піксель не існує
+            if (isExist[i][n] == false) { }
+
+            //якщо піксель існує і він чорного кольору - виявлено обєкт - починаємо виявляти всі його піксклі
+            else if (isExist[i][n] == true && arr[i][n].R == 0)
+            {
+                isExist[i][n] == false;
+            }   
+
+
+            //якщо піксель існує і він білий кольору - виявлено обєкт - починаємо виявляти всі його піксклі
+            else if ( isExist[i][n] == true && arr[i][n].R != 0 )
+            {
+                //поміщаємо знайдений піксель у буфер та видаляємо його з існуючих
+                let buf = new Array();//буфер для пікселів
+                    let newObj = {};
+                    newObj.X = n;
+                    newObj.Y = i;
+                    buf[0] = newObj //записуємо 1-й елемент в буфер
+                bufCount = 1;
+                isExist[i][n] = false;//видаляємо з існуючих
+                  
+                let objPixels = new Array();
+                //доки в буфері є елементи
+                while (bufCount > 0)
+                {           
+                 
+                    //перевіряємо сусідні пікселі, якщо вони чорні і існують - додаємо у буфер
+                    for (My = buf[0].Y - 1  ; My <= buf[0].Y + 1 ; My++)
+                        for (Mx = buf[0].X - 1  ; Mx <= buf[0].X + 1 ; Mx++)
+                            if (My >= 0 && My < H && Mx >= 0 && Mx < W && arr[My][Mx].R != 0 && isExist[My][Mx] == true) //якщо піксель в межах зображення і білий і існує - записуємо його в буфер
+                            {
+                                let newObj = {};
+                                newObj.X = Mx;
+                                newObj.Y = My;
+                                buf[bufCount] = newObj;
+                                bufCount++;
+                                isExist[My][Mx] = false;
+                            }           
+                     
+                    //Записуємо поточний піксель і масив пікселей обєкта, видаляємо його з існуючих та з буфера
+                    objPixels[objPixels.length] = buf[0];
+                 
+                    buf = buf.slice(1, bufCount);
+                    //for (m = 0; m < bufCount - 1; m++) buf[m] = buf[m + 1];
+                    bufCount--;
+                }
+          
+
+                let data =  get2dArFromArrPixels( objPixels );
+
+                newObj2 = {};
+                newObj2.left = data.left;
+                newObj2.right = data.right;
+                newObj2.top = data.top;
+                newObj2.bottom = data.bottom;
+                //newObj2.obg = objPixels;  
+                newObj2.data2dAr = data.data2dAr;
+                findObjects[findObjects.length] = newObj2;  
+            }        
+
+
+
+        }
+    }
+
+ 
+    return findObjects;
+}
