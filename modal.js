@@ -58,9 +58,9 @@ function setArrToCanvas( dataArray, W,H , canvasId, restAr = null)
 		context.lineWidth = "2";
 		context.strokeStyle = "red";
         context.lineJoin = "round";
-        context.rect(  x1,  y1, x2 - x1, y2 - y1 );
-        context.closePath();
+        context.rect( x1, y1, x2 - x1, y2 - y1 );
 		context.stroke();
+		//context.closePath();
 		console.log( restAr );
 	} 
 }

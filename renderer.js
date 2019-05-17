@@ -33,7 +33,8 @@ function handleError (e) {
 }
 function getVideo()
 {
-    let thumbSize = { width: theWindows[selWindow].width , height: theWindows[selWindow].width } ;
+	let thumbSize = determinaScreenShot( );
+    //let thumbSize = { width: theWindows[selWindow].width , height: theWindows[selWindow].width } ;
     let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
 
     desktopCapturer.getSources( option , (error, sources) => {
@@ -42,17 +43,21 @@ function getVideo()
 		{
 			if (sources[i].name === theWindows[selWindow].name) 
 			{
+				//get siz
+				let siz = sources[i].thumbnail.getSize();
+				theWindows[selWindow].width = siz.width;
+				theWindows[selWindow].height = siz.height;
 
 			  	navigator.mediaDevices.getUserMedia({
 			    audio: false,
 			    video: {
 					mandatory: {
 						chromeMediaSource: 'desktop',
-						chromeMediaSourceId: sources[i].id,
-						minWidth: theWindows[selWindow].width,
-						maxWidth: theWindows[selWindow].width,
-						minHeight: theWindows[selWindow].height,
-						maxHeight: theWindows[selWindow].height
+						chromeMediaSourceId: sources[i].id /*,
+						minWidth: siz.width,
+						maxWidth: siz.width,
+						minHeight: siz.height,
+						maxHeight: siz.height */
 					}
 			    }
 			  	}).then((stream) => handleStream(stream))
@@ -66,8 +71,8 @@ function getVideo()
 
 function getWindows()
 {
-	let thumbSize = determinaScreenShot( );
-    let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
+ 	//let thumbSize = determinaScreenShot( );
+    let option =  {types: ['window', 'screen'] }; //,thumbnailSize:thumbSize };
 
 	desktopCapturer.getSources( option, (error, sources) => {
     
@@ -77,13 +82,13 @@ function getWindows()
     let text = "";
     for (let i = 0; i < sources.length; ++i)  
     {
-    	let siz = sources[i].thumbnail.getSize();
+    	//let siz = sources[i].thumbnail.getSize();
 
     	let wind = {};
     	wind.id = sources[i].id;
     	wind.name = sources[i].name;
-    	wind.width = siz.width;
-    	wind.height = siz.height;
+    	wind.width = 1366; //siz.width;
+    	wind.height = 768; //siz.height;
     	theWindows[i]= wind;
 
       	text += "<option value='"+i+"' >"+sources[i].name+"</option>";
@@ -92,6 +97,7 @@ function getWindows()
 
     let windowsSelect = document.getElementById('windowsSelect');
 	windowsSelect.innerHTML = text;
+	
 	getVideo();
     
   });
@@ -146,7 +152,7 @@ settingsApp.addEventListener('click', function(event)
 const windowsSelect = document.getElementById('windowsSelect');
 windowsSelect.addEventListener('change', function(event)
 {
-	selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;;
+	selWindow = windowsSelect.options[windowsSelect.selectedIndex].value;
 	getVideo();
 });
 
@@ -853,8 +859,8 @@ function getTopAndBottomLine(findObjects, line = "top" )
  			newArr[newArr.length] = newLine;
  		}	 
  	}
- 	console.log(newArr);
- 
+ 	
+ 	//console.log(newArr);
 
  	//беремо верхній і нижній ряд із 3-х рядів
  	let newRetArr = [];
@@ -869,6 +875,7 @@ function getTopAndBottomLine(findObjects, line = "top" )
  		}
 
  	}
+ 	console.log(newRetArr);
 
  	return newRetArr;
 }
