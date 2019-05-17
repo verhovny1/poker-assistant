@@ -314,6 +314,11 @@ logText += "start recognition = " + getTime() + "\n";
 			logText += "segmentation  = " + getTime() + "\n";
 			//console.log(findObjects);
 
+			/*let findOb = functions.segmentationScaner2( dataArr,  "black");
+			logText += "segmentationScaner  = " + getTime() + "\n";
+			console.log(findOb);*/
+
+
 	 		findObjects = removeUnnecessaryObjects( findObjects, area.right-area.left, area.bottom-area.top );
 	 		//console.log(findObjects);
 
@@ -373,21 +378,20 @@ logText += "start recognition = " + getTime() + "\n";
 
 			let dataArr = functions.slice2dArr( data, area ); 
 			logText += "get areas from img = " + getTime() + "\n";
- 			functions.setArrToCanvas( dataArr , "canvas2");
+ 			//functions.setArrToCanvas( dataArr , "canvas2");
 	 
  			let dataArrX2 = functions.resampleSingleArr( dataArr, (area.right - area.left) * 2 , (area.bottom - area.top) * 2);
  			logText += "resample areas X2 = " + getTime() + "\n";
- 			functions.setArrToCanvas( dataArrX2 , "canvas3"); 
+ 			//functions.setArrToCanvas( dataArrX2 , "canvas3"); 
 
 			dataArr = functions.binarize( dataArrX2 , 4, 2, 200 );
 			logText += "binarize  = " + getTime() + "\n";
-	 		functions.setArrToCanvas( dataArr , "canvas4");
-
+	 		//functions.setArrToCanvas( dataArr , "canvas4");
+ 
 	 		let findObjects = [];
 			findObjects = functions.segmentationArrayPixelscanWite( dataArr );
-			logText += "segmentation  = " + getTime() + "\n";
+			//logText += "segmentation  = " + getTime() + "\n";
 			//console.log(findObjects);
-
  
 			let recognSimv = []; let recCount = 0;	
 			for (var n = 0; n < findObjects.length; n++) 
@@ -438,6 +442,88 @@ logText += "start recognition = " + getTime() + "\n";
 	 		console.log(thePot);
 
 	 		logText += "find Pot:  [" + thePot.toString() + "] : " + getTime() + "\n";
+		}
+
+		else if (area.type == "AreaOfPlayer1") //( area.type.indexOf("AreaOfPlayer") != -1 )
+		{
+			logText += "Area "+i.toString() + "("+area.type+"): " + getTime() + "\n";
+
+			let dataArr = functions.slice2dArr( data, area ); 
+			logText += "get areas from img = " + getTime() + "\n";
+ 			functions.setArrToCanvas( dataArr , "canvas2");
+	 		//console.log(dataArr);
+
+	 		let colorFound = colorsFound(dataArr);
+	 		console.log(colorFound);
+
+ 			let dataArrX2 = functions.resampleSingleArr( dataArr, (area.right - area.left) * 2 , (area.bottom - area.top) * 2);
+ 			logText += "resample areas X2 = " + getTime() + "\n";
+ 			functions.setArrToCanvas( dataArrX2 , "canvas3"); 
+
+			dataArr = functions.binarize( dataArrX2 , 4, 2, 180 );
+			logText += "binarize  = " + getTime() + "\n";
+	 		functions.setArrToCanvas( dataArr , "canvas4");
+ 
+	 		let findObjects = [];
+			findObjects = functions.segmentationArrayPixelscanWite( dataArr );
+			logText += "segmentation  = " + getTime() + "\n";
+			//console.log(findObjects);
+ 
+ 			if ( colorFound.color == "noine ")
+ 			{
+
+ 			}else 
+ 			{
+ 				findObjects = getTopAndBottomLine(findObjects, "bottom" );
+
+ 				let recognSimv = []; let recCount = 0;	
+				for (var n = 0; n < findObjects.length; n++) 
+				{
+					let dataArr16x16 = functions.resampleSingleArr(findObjects[n].data2dAr, 16, 16);
+					functions.setArrToCanvas( dataArr16x16 , "canvas"+ (5+n).toString() );
+					//logText += "resample  obj" + n.toString() + ": " + getTime() + "\n";
+
+					let bin16x16 = functions.binarizeArray(dataArr16x16,127);
+					//logText += "binarizeArray  obj" + n.toString() + ": " + getTime() + "\n";
+
+					var bin256 = functions.C2Dto1D(bin16x16);
+					//logText += "C2Dto1D  obj" + n.toString() + ": " + getTime() + "\n";
+					//console.log(bin256);
+		 
+					var output = netNums.run( bin256 );
+					//console.log(output);
+
+		 			//отримуємо масив розпізнаних символів	 recognSimv
+		            var max = parseFloat( output[0] ) ; var maxPos = 0;
+		            for (var m = 0; m < outputArrNums.length ; m++) //for (var m = 0; m < output.length ; m++) - не работает с-чка
+		            {
+		                if ( max < parseFloat(output[m]) )
+		                {
+		                    max = parseFloat(output[m]);
+		                    maxPos = m;
+		                }
+		            }
+		            if (max > 0.1) 
+		            {
+		        		let ob = {};
+		        		ob.simv = outputArrNums[maxPos];
+		        		ob.prob = max.toString();
+		        		ob.top = findObjects[n].top;
+		        		ob.left = findObjects[n].left;
+		        		ob.right = findObjects[n].right;
+		        		ob.bottom = findObjects[n].bottom;
+		        		ob.isEnable = true;
+		        		recognSimv[recCount] = ob;
+		        		recCount++;
+					}
+				 
+
+				}
+ 			}
+
+			 
+
+
 		}
 
 
@@ -539,8 +625,11 @@ function removeUnnecessaryObjects( findObjects, H , W )
 
  	//беремо верхній і нижній ряд із 3-х рядів
  	let newRetArr = [];
- 	for (var i = 0; i < newArr[0].length; i++)  newRetArr[newRetArr.length] = newArr[0][i];
- 	for (var i = 0; i < newArr[newArr.length-1].length; i++)  newRetArr[newRetArr.length] = newArr[newArr.length-1][i];
+ 	if ( newArr.length > 0 )
+ 	{
+ 		for (var i = 0; i < newArr[0].length; i++)  newRetArr[newRetArr.length] = newArr[0][i];
+ 		for (var i = 0; i < newArr[newArr.length-1].length; i++)  newRetArr[newRetArr.length] = newArr[newArr.length-1][i];
+ 	}
 
  	return newRetArr;
 
@@ -667,4 +756,119 @@ function getPot(recognSimv)
 	for (var i = 0; i < recognSimv.length; i++) retArr[i] = recognSimv[i].simv;
 
 	return retArr
+}
+
+
+///////////////////////////////////////////////////////AreaOfPlayer/////
+function rgbToHex(r, g, b) 
+{
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+function colorsFound(rgbaArr)
+{
+	let H = rgbaArr.length;
+	let W = rgbaArr[0].length;
+
+	for (var i = 0; i < H; i++) {
+		for (var n = 0; n < W; n++) 
+		{
+			if ( rgbaArr[i][n].R > 150 && rgbaArr[i][n].R < 255 && rgbaArr[i][n].G > 0 && rgbaArr[i][n].G < 10 && rgbaArr[i][n].B > 20 && rgbaArr[i][n].B < 30 )
+			{
+				var hex = "#" + ("000000" + rgbToHex( rgbaArr[i][n].R , rgbaArr[i][n].G , rgbaArr[i][n].B )).slice(-6);
+				return {  color: "red", hex: hex };
+			}
+			else if ( rgbaArr[i][n].R > 20 && rgbaArr[i][n].R < 40 && rgbaArr[i][n].G > 100 && rgbaArr[i][n].G < 200 && rgbaArr[i][n].B > 30 && rgbaArr[i][n].B < 60 )
+			{
+				var hex = "#" + ("000000" + rgbToHex( rgbaArr[i][n].R , rgbaArr[i][n].G , rgbaArr[i][n].B )).slice(-6);
+				return {  color: "green", hex: hex };
+			}	
+			else if ( rgbaArr[i][n].R > 100 && rgbaArr[i][n].R < 200 && rgbaArr[i][n].G > 50 && rgbaArr[i][n].G < 80 && rgbaArr[i][n].B > 10 && rgbaArr[i][n].B < 30 )
+			{
+				var hex = "#" + ("000000" + rgbToHex( rgbaArr[i][n].R , rgbaArr[i][n].G , rgbaArr[i][n].B )).slice(-6);
+				return {  color: "oring", hex: hex };
+			}
+			else if ( rgbaArr[i][n].R > 10 && rgbaArr[i][n].R < 40 && rgbaArr[i][n].G > 80 && rgbaArr[i][n].G < 150 && rgbaArr[i][n].B > 80 && rgbaArr[i][n].B < 150 )
+			{
+				var hex = "#" + ("000000" + rgbToHex( rgbaArr[i][n].R , rgbaArr[i][n].G , rgbaArr[i][n].B )).slice(-6);
+				return {  color: "blue", hex: hex };
+			}
+			else if ( rgbaArr[i][n].R > 100 && rgbaArr[i][n].R < 160 && rgbaArr[i][n].G > 0 && rgbaArr[i][n].G < 10 && rgbaArr[i][n].B > 100 && rgbaArr[i][n].B < 160 )
+			{
+				var hex = "#" + ("000000" + rgbToHex( rgbaArr[i][n].R , rgbaArr[i][n].G , rgbaArr[i][n].B )).slice(-6);
+				return {  color: "violet", hex: hex };
+			}	
+		}	
+	}
+
+	return "noine";
+}
+
+function getTopAndBottomLine(findObjects, line = "top" )
+{
+	//Розподіляємо обэкти по рядам
+		//Знаходимо верхній обєкт і переміщаємо його в перед масиву. Створюємо масив значень (в рядку)
+		let inLineArr = [];
+		for (var i = 0; i < findObjects.length; i++) 
+		{
+			if ( findObjects[0].top > findObjects[i].top)
+			{
+				let buf = findObjects[i].top;
+				findObjects[i].top = findObjects[0].top;
+				findObjects[0].top  = buf;
+			}
+	 		
+			inLineArr[i] = false;
+	 	}
+
+ 	let newArr = [];	
+ 	for (var i = 0; i < findObjects.length; i++) 
+ 	{
+ 		//якщо обєкт не знаходиться в рядку
+ 		if ( inLineArr[i] == false )
+ 		{
+ 			let newLine = [];
+ 				newLine[newLine.length] = findObjects[i];
+ 			inLineArr[i] = true;
+
+ 			let height =  findObjects[i].bottom - findObjects[i].top;
+ 			let mediane = findObjects[i].top+height/2;
+
+ 			
+ 			for (var n = 0; n < findObjects.length; n++) 
+ 			{
+ 				let thisTop = findObjects[n].top;
+ 				let thisBottom = findObjects[n].bottom;
+ 				let thisHeight = thisBottom - thisTop;
+
+ 				if( i != n && height*0.5 <  thisHeight && thisTop < mediane &&  thisBottom >  mediane )
+ 				{
+ 					newLine[newLine.length] = findObjects[n];
+ 					inLineArr[n] = true;
+ 				}
+
+ 			}
+ 			newArr[newArr.length] = newLine;
+ 		}	 
+ 	}
+ 	console.log(newArr);
+ 
+
+ 	//беремо верхній і нижній ряд із 3-х рядів
+ 	let newRetArr = [];
+ 	if ( newArr.length > 0 )
+ 	{
+ 		if ( line == "top"  ) for (var i = 0; i < newArr[0].length; i++)  newRetArr[newRetArr.length] = newArr[0][i];
+ 		else if( line = "bottom" ) for (var i = 0; i < newArr[newArr.length-1].length; i++)  newRetArr[newRetArr.length] = newArr[newArr.length-1][i];
+ 		else if( line = "all" )
+ 		{
+ 			for (var i = 0; i < newArr[0].length; i++)  newRetArr[newRetArr.length] = newArr[0][i];
+ 			for (var i = 0; i < newArr[newArr.length-1].length; i++)  newRetArr[newRetArr.length] = newArr[newArr.length-1][i];
+ 		}
+
+ 	}
+
+ 	return newRetArr;
 }

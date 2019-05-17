@@ -18,9 +18,9 @@ exports.getRGB2dArr = function(arr,w,h)
         SummMass = []; // проміжний масив-строка 
         for (var n = 0; n < w  ; n++) {
             var MY_RGBA = {}; // проміжний обєкт для запису свойств
-            MY_RGBA.B = arr[counter];
+            MY_RGBA.R = arr[counter];
             MY_RGBA.G = arr[counter + 1];
-            MY_RGBA.R = arr[counter + 2];
+            MY_RGBA.B = arr[counter + 2];
             MY_RGBA.A = arr[counter + 3];
             SummMass[n] = MY_RGBA;
             counter += 4;
@@ -736,4 +736,275 @@ exports.segmentationArrayPixelscanWite = function ( arr )
 
  
     return findObjects;
+}
+
+
+
+function createArrayWithValue( W, H, value = false )
+{
+    let retArr = [];
+    for (var i = 0; i < H; i++) 
+    {   
+        let someArr = [];
+        for (var n = 0; n < W; n++)  someArr[n] = value;
+        retArr[i] = someArr;
+    }
+
+    return retArr;
+}
+
+
+function inArr( val, arr)
+{
+    for (var i = 0; i < arr.length; i++) 
+        if (arr[i] == val) return true;
+
+    return false; 
+}
+
+
+
+
+exports.segmentationScaner2 = function ( arr,  parametr = "black", blackColor = 0 , witeColor = 255)
+{
+    let H = arr.length; 
+    let W = arr[0].length;
+
+
+    let pixColor = [];
+    if ( parametr == "black" ) pixColor = [blackColor]; 
+    else if ( parametr == "wite" ) pixColor = [witeColor];
+    else if ( parametr == "all"  ) pixColor = [blackColor, witeColor];
+ 
+    let findObjects = []; //масив для знайдених обєктів
+    let auxiliaryArray = createArrayWithValue(W, H, null); //масив відповідний до arr, де зберігаються Айді знайдених обєктів що зберігаються в findObjects
+    
+    //цикл згори до низу
+    for (var i = 0; i < H; i++) 
+    {
+        //перший прохід
+        if (i == 0)
+        {
+            //перевыримо перший обєкт
+            if(  inArr(arr[i][0].R, pixColor)  )   //якщо колір пікселю - колір обєкту
+            {
+                //Створюємо новий обєкт
+                let someObj = {}; 
+                    someObj.X = [0]; 
+                    someObj.Y = [i];
+                    someObj.count = 1;
+                findObjects[findObjects.length] = someObj;
+                //Цей піксель тепер відноситься до обєкту №
+                auxiliaryArray[i][0] = findObjects.length-1;
+            }
+            //проходимо зліва на право починаючи з 2-го  і створюємо обєкти
+            for (var n = 1; n < W; n++) 
+            {
+                if ( inArr(arr[i][n].R, pixColor)  ) //Цей колір - колір обєкту
+                {
+                    if ( arr[i][n-1].R == arr[i][n].R  ) // якщо попередній піксель того ж кольору  
+                    {
+                        //бремо айді обєкту з попереднього пікселю
+                        let objId = auxiliaryArray[i][n-1];
+                        //додаємо цей піксель в обєкт
+                        let count = findObjects[objId].count;
+                        findObjects[objId].X[count] = n;
+                        findObjects[objId].Y[count] = i;
+                        findObjects[objId].count++;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = objId;
+                    }
+                    else if (arr[i][n-1].R != arr[i][n].R   ) // якщо попередній піксель іншого кольору  
+                    {
+                        //Створюємо новий обєкт
+                        let someObj = {}; 
+                            someObj.X = [n]; 
+                            someObj.Y = [i];
+                            someObj.count = 1;
+                        findObjects[findObjects.length] = someObj;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = findObjects.length-1;
+                    }
+                
+                }
+            }
+
+        }
+
+        //Всі наступні проходи
+        else
+        {
+
+            //перевыримо перший обєкт
+            if(  inArr(arr[i][0].R, pixColor)  )  //якщо колір пікселю - колір обєкту
+            {
+                 
+                if ( arr[i-1][0].R == arr[i][0].R  ) //якщо верхній піксель того ж кольору  
+                {
+                    //бремо айді обєкту з верхнього пікселю
+                    let objId = auxiliaryArray[i-1][0];  
+                    //додаємо цей піксель в обєкт
+                    let count = findObjects[objId].count;
+                    findObjects[objId].X[count] = 0;
+                    findObjects[objId].Y[count] = i ;
+                    findObjects[objId].count++;
+                    //Цей піксель тепер відноситься до обєкту №
+                    auxiliaryArray[i][0] = objId;
+                } 
+                else if ( arr[i-1][0].R != arr[i][0].R  ) //якщо верхній піксель іншого кольору   
+                {
+                    //Створюємо новий обєкт
+                    let someObj = {}; 
+                        someObj.X = [0]; 
+                        someObj.Y = [i];
+                        someObj.count = 1;
+                    findObjects[findObjects.length] = someObj;
+                    //Цей піксель тепер відноситься до обєкту №
+                    auxiliaryArray[i][0] = findObjects.length-1;
+                }
+            }
+
+            //проходимо зліва на право починаючи з 2-го 
+            for (var n = 1; n < W; n++) 
+            {
+                if(  inArr(arr[i][n].R, pixColor)  )  //якщо колір пікселю - колір обєкту
+                {   
+                    //якщо попередній і верхній того ж кольору і вони з різних обєктів (зливаємо 2-ва обєкта)
+                    if( arr[i][n-1].R == arr[i][n].R && arr[i-1][n].R == arr[i][n].R && auxiliaryArray[i][n-1] != auxiliaryArray[i-1][n]  )
+                    { 
+                        //get top pix Obj ID
+                        let topPisObjID = auxiliaryArray[i-1][n];
+                        //get left pix Obj ID
+                        let leftPisObjID = auxiliaryArray[i][n-1]; 
+ 
+                        //проходимо по 2-му обєкту (в який входить верхній піксель) і позначаємо, що вони входять в перший (лівий) обєкт
+                        for (var m = 0; m < findObjects[topPisObjID].count; m++) 
+                        {
+                            let x = findObjects[topPisObjID].X[m];
+                            let y = findObjects[topPisObjID].Y[m];
+                            auxiliaryArray[y][x] = leftPisObjID;
+
+                            //вставляємо пікселі з верхнього в лівий обєкт
+                            let count = findObjects[leftPisObjID].count;
+                            findObjects[leftPisObjID].X[count] = findObjects[topPisObjID].X[m] ;
+                            findObjects[leftPisObjID].Y[count] = findObjects[topPisObjID].Y[m] ;
+                            findObjects[leftPisObjID].count++;
+                        }
+
+                        
+                        //видаляємо верхній обєкт
+                        findObjects[topPisObjID].count = 0;
+
+                        //додаємо цей(поточний піксель) до лівого обєкту
+                        let count = findObjects[leftPisObjID].count;
+                        findObjects[leftPisObjID].X[count] =  n;
+                        findObjects[leftPisObjID].Y[count] = i;
+                        findObjects[leftPisObjID].count++;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = leftPisObjID;  
+                    } 
+                    //якщо попередній того ж кольору ( додаємо піксель в обєкт )
+                    else if ( arr[i][n-1].R == arr[i][n].R  )
+                    {
+                        //бремо айді обєкту з попереднього пікселю
+                        let objId = auxiliaryArray[i][n-1];  
+                        //додаємо цей піксель в обєкт
+                        let count = findObjects[objId].count;
+                        findObjects[objId].X[count] = n;
+                        findObjects[objId].Y[count] = i;
+                        findObjects[objId].count++;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = objId;
+                    }
+                    //якщо верхній того ж кольору ( додаємо піксель в обєкт )
+                    else if ( arr[i-1][n].R == arr[i][n].R )
+                    {   
+                        //бремо айді обєкту з верхнього пікселю
+                        let objId = auxiliaryArray[i-1][n];    
+                        //додаємо цей піксель в обєкт
+                        let count = findObjects[objId].count;
+                        findObjects[objId].X[count] = n;
+                        findObjects[objId].Y[count] = i;
+                        findObjects[objId].count++;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = objId;
+                    }
+                    //інакще - попередній та верхній іншого кольору ( створюємо новий обєкт )
+                    else
+                    {    
+                        //Створюємо новий обєкт
+                        let someObj = {}; 
+                            someObj.X = [n]; 
+                            someObj.Y = [i]; 
+                            someObj.count = 1; 
+                        findObjects[findObjects.length] = someObj;
+                        //Цей піксель тепер відноситься до обєкту №
+                        auxiliaryArray[i][n] = findObjects.length-1;
+                    }
+                }
+            }
+
+ 
+        }
+    }
+
+    //console.log(auxiliaryArray);
+    //console.log(findObjects);
+    let newFindObjects = [];
+    for (var i = 0; i < findObjects.length; i++) if (findObjects[i].count != 0 )  newFindObjects[newFindObjects.length] = findObjects[i]; 
+
+
+    let retObjArr = [];
+    for (var m = 0; m < newFindObjects.length; m++) 
+    {
+ 
+        let top = Math.min.apply(null, newFindObjects[m].Y );
+        let left = Math.min.apply(null, newFindObjects[m].X );
+        let bottom = Math.max.apply(null, newFindObjects[m].Y );
+        let right = Math.max.apply(null, newFindObjects[m].X );
+ 
+        
+        let objId = auxiliaryArray[ newFindObjects[m].Y[0] ][ newFindObjects[m].X[0] ];
+ 
+        let data = [];
+        for (var i = top; i <= bottom; i++) 
+        {
+            let sumArr = [];
+            for (var n = left; n <= right; n++) 
+            {
+                let someObj = {}
+
+                if(  auxiliaryArray[i][n] == objId )  
+                {
+                    someObj.R = blackColor;
+                    someObj.G = blackColor;
+                    someObj.B = blackColor;
+                    someObj.A = 255;
+                }
+                else
+                {
+                    someObj.R = witeColor;
+                    someObj.G = witeColor;
+                    someObj.B = witeColor;
+                    someObj.A = 255; 
+                }
+
+                sumArr[sumArr.length] = someObj;
+
+            }
+            data[data.length] =  sumArr;
+        }
+
+
+        let someObj = {}
+        someObj.top = top;
+        someObj.left = left;
+        someObj.bottom = bottom;
+        someObj.right = right;
+        someObj.data2dAr = data;
+        retObjArr[m] = someObj;
+    }
+
+
+    return retObjArr;
 }
