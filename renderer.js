@@ -33,7 +33,9 @@ function handleError (e) {
 }
 function getVideo()
 {
+	//let thumbSize = { width: 1024 , height: 1024 } ;
 	let thumbSize = determinaScreenShot( );
+    console.log(thumbSize);
     //let thumbSize = { width: theWindows[selWindow].width , height: theWindows[selWindow].width } ;
     let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
 
@@ -47,7 +49,7 @@ function getVideo()
 				let siz = sources[i].thumbnail.getSize();
 				theWindows[selWindow].width = siz.width;
 				theWindows[selWindow].height = siz.height;
-
+console.log(siz);
 			  	navigator.mediaDevices.getUserMedia({
 			    audio: false,
 			    video: {
