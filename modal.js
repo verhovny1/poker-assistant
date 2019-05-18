@@ -42,9 +42,8 @@ function setArrToCanvas( dataArray, W,H , canvasId, restAr = null)
   
     let context = canvas.getContext('2d');
 	let myImageData = context.createImageData( W, H );
-	for (i = 0; i < dataArray.length; i += 1) myImageData.data[i] = dataArray[i];
-
-	context.putImageData(myImageData, 0, 0); 
+	let data = myImageData.data;
+	for (i = 0; i < dataArray.length; i += 1) data[i] = dataArray[i];
 
 	if ( restAr != null )
 	{
@@ -52,7 +51,40 @@ function setArrToCanvas( dataArray, W,H , canvasId, restAr = null)
 		let x2 = Math.max(restAr.x1,restAr.x2);
 		let y1 = Math.min(restAr.y1,restAr.y2);
 		let y2 = Math.max(restAr.y1,restAr.y2);
+		 
+		for (i = 0; i < dataArray.length; i += 4)
+		{
+			if ( i >= (W*y1+x1)*4  && i <= (W*y1+x2)*4 )
+			{
+				 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+			}
+	 		else if ( i >=  (W * y2 + x1) * 4  && i <= (W* y2 + x2) * 4 )
+			{
+				 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+			}
+	 		else if ( i % (W*4) == x1*4 &&  i >= (W*y1+x1)*4  && i <=  (W * y2 + x1) * 4  )
+	 		{
+	 			 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+	 		}
+	 		else if ( i % (W*4) == x2*4 &&  i >= (W*y1+x2)*4  && i <=  (W * y2 + x2) * 4  )
+	 		{
+	 			 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+	 		}
 
+ 		}
+		 /*
 		// Red rectangle
 		context.beginPath();
 		context.lineWidth = "2";
@@ -62,7 +94,12 @@ function setArrToCanvas( dataArray, W,H , canvasId, restAr = null)
 		context.stroke();
 		//context.closePath();
 		console.log( restAr );
+		*/
 	} 
+
+	
+	
+	context.putImageData(myImageData, 0, 0); 
 }
  
 
