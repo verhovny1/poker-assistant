@@ -102,6 +102,42 @@ exports.slice2dArr = function( arr , arg )
     return newArr;
 }
 
+//Функція для вирізання 2Д масиву
+exports.slice2dAreaFrom1dArr = function( arr, W, H , arg )
+{
+    let newArr = [];
+
+    for (var i = arg.top; i <= arg.bottom; i++) 
+    {
+        let left =  W*i*4 + arg.left*4 ;
+        let right = W*i*4 + arg.right*4 - 1;
+
+        for (var n = left; n <= right; n++) 
+        {
+            newArr[newArr.length] = arr[n];
+        }
+    }
+
+    return newArr;
+}
+
+exports.slice2dAreaFrom1dArr2 = function( arr, W, H , arg )
+{
+    let newArr = [];
+
+    for (var i = 0; i < arr.length; i++) 
+    {
+        let x1 = arg.left;
+        let x2 = arg.right;
+        let y1 = arg.top;
+        let y2 = arg.bottom;
+
+        if ( i%(W*4) >= x1*4 &&  i%(W*4) <= x2*4 - 1  && i >= (W*y1+x1)*4    && i < (W*y2+x2)*4   ) newArr[newArr.length] = arr[i];
+    }
+
+    return newArr;
+}
+
 //Функція для відображення масиву пікселів на канвасі
 exports.setArrToCanvas = function( arr , canvasId)
 {

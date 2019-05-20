@@ -325,6 +325,8 @@ function mainRecognition( )
   	//отримуємо розміри та 
 	let siz = {width: theWindows[selWindow].width, height: theWindows[selWindow].height}
 
+
+
 logText = "";
 logText += "Start = " + getTime() + "\n";
 
@@ -332,12 +334,13 @@ logText += "Start = " + getTime() + "\n";
 	//бітмап зображення
 	let bitmap = getScreen(); //.slice(0, siz.width * siz.height * 4);	
 	logText += "get bitmap = " + getTime() + "\n";
-			
+	
+	/*		
 	//перетворюємо bitmap в 2Д масив
 	let data = functions.getRGB2dArr( bitmap, siz.width, siz.height);
 	logText += "convert to 2D arr = " + getTime() + "\n";
 	//functions.setArrToCanvas( data , "canvas1");	
- 	
+ 	*/
 
 
 logText += "start recognition = " + getTime() + "\n"; 	      		    		 
@@ -351,31 +354,40 @@ logText += "start recognition = " + getTime() + "\n";
  		{
  			logText += "Area "+i.toString() +  "("+area.type+"): " + getTime() + "\n";
 
+ 			/*
 			let dataArr = functions.slice2dArr( data, area ); 
 			logText += "get areas from img = " + getTime() + "\n";
  			functions.setArrToCanvas( dataArr , "canvas2");
-	 
+			*/ 
+
+ 			let dataArr1D = functions.slice2dAreaFrom1dArr( bitmap, siz.width, siz.height, area );
+ 			logText += "get 1D areas from bitmap = " + getTime() + "\n";
+
+ 			let dataArr = functions.getRGB2dArr( dataArr1D, area.right- area.left, area.bottom - area.top );
+			logText += "convert to 2D arr = " + getTime() + "\n";
+			//functions.setArrToCanvas( data2 , "canvas3");
+
+
 			dataArr = functions.blurryColorImg(dataArr,  1, "averaging-to-new" );
 			logText += "get blurry = " + getTime() + "\n";
-			functions.setArrToCanvas( dataArr , "canvas3");
+			//functions.setArrToCanvas( dataArr , "canvas3");
 
 			dataArr = functions.binarize( dataArr , 4, 2, 140 );
 			logText += "binarize  = " + getTime() + "\n";
-	 		functions.setArrToCanvas( dataArr , "canvas4");
-
-	 		let findObjects = [];
-			findObjects = functions.segmentationArrayPixelscan( dataArr );
+	 		//functions.setArrToCanvas( dataArr , "canvas4");
+/*
+			let findObjects = functions.segmentationArrayPixelscan( dataArr );
 			logText += "segmentation  = " + getTime() + "\n";
 			//console.log(findObjects);
-
-			/*let findOb = functions.segmentationScaner2( dataArr,  "black");
+*/
+			let findObjects = functions.segmentationScaner2( dataArr,  "black");
 			logText += "segmentationScaner  = " + getTime() + "\n";
-			console.log(findOb);*/
+			//console.log(findObjects);
 
 
 	 		findObjects = removeUnnecessaryObjects( findObjects, area.right-area.left, area.bottom-area.top );
 	 		//console.log(findObjects);
-
+ 
 	 		let recognSimv = []; let recCount = 0;	
 			for (var n = 0; n < findObjects.length; n++) 
 			{
@@ -424,7 +436,7 @@ logText += "start recognition = " + getTime() + "\n";
 			let cards = recCards(recognSimv);
 			console.log(cards);
  
-			logText += "find cards:  [" + cards.toString() + "] : " + getTime() + "\n";
+			logText += "find cards:  [" + cards.toString() + "] : " + getTime() + "\n";  
 		} 
 /*		else if ( area.type == "PotOnTable" )
 		{
