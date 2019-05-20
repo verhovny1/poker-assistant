@@ -33,8 +33,9 @@ function handleError (e) {
 }
 function getVideo()
 {
-	//let thumbSize = { width: 1024 , height: 1024 } ;
-	let thumbSize = determinaScreenShot( );
+	/*
+	let thumbSize = { width: 1024 , height: 1024 } ;
+	//let thumbSize = determinaScreenShot( );
     console.log(thumbSize);
     //let thumbSize = { width: theWindows[selWindow].width , height: theWindows[selWindow].width } ;
     let option =  {types: ['window', 'screen'], thumbnailSize: thumbSize};
@@ -55,11 +56,11 @@ console.log(siz);
 			    video: {
 					mandatory: {
 						chromeMediaSource: 'desktop',
-						chromeMediaSourceId: sources[i].id /*,
+						chromeMediaSourceId: sources[i].id,
 						minWidth: siz.width,
 						maxWidth: siz.width,
 						minHeight: siz.height,
-						maxHeight: siz.height */
+						maxHeight: siz.height 
 					}
 			    }
 			  	}).then((stream) => handleStream(stream))
@@ -68,8 +69,51 @@ console.log(siz);
 			}
 		}
     }) 
+    */
+
+ 
+    let id = theWindows[selWindow].id;
+    onAccessApproved(id);
   
 }
+
+
+
+function onAccessApproved(desktop_id) {
+  if (!desktop_id) {
+    console.log('Desktop Capture access rejected.');
+    return;
+  }
+  desktopSharing = true;
+ 
+  console.log("Desktop sharing started.. desktop_id:" + desktop_id);
+
+  navigator.webkitGetUserMedia({
+    audio: false,
+    video: {
+      mandatory: {
+        chromeMediaSource: 'desktop',
+        chromeMediaSourceId: desktop_id,
+        minWidth: theWindows[selWindow].width,
+        maxWidth: theWindows[selWindow].width,
+        minHeight: theWindows[selWindow].height,
+        maxHeight: theWindows[selWindow].height
+      }
+    }
+  }, gotStream, getUserMediaError);
+
+  function gotStream(stream) {
+    localStream = stream;
+    const video = document.getElementById('video');// document.querySelector('video')
+    video.srcObject = stream;
+    video.onloadedmetadata = (e) => video.play();
+  }
+
+  function getUserMediaError(e) {
+    console.log('getUserMediaError: ' + JSON.stringify(e, null, '---'));
+  }
+}
+
 
 function getWindows()
 {
@@ -84,13 +128,15 @@ function getWindows()
     let text = "";
     for (let i = 0; i < sources.length; ++i)  
     {
-    	//let siz = sources[i].thumbnail.getSize();
+    	let siz = sources[i].thumbnail.getSize();
+    	let width = 2048;
+    	let height = width * ( siz.height/ siz.width );
 
     	let wind = {};
     	wind.id = sources[i].id;
     	wind.name = sources[i].name;
-    	wind.width = 1366; //siz.width;
-    	wind.height = 768; //siz.height;
+    	wind.width = width;//1366; //siz.width;
+    	wind.height = height;//768; //siz.height;
     	theWindows[i]= wind;
 
       	text += "<option value='"+i+"' >"+sources[i].name+"</option>";
@@ -301,21 +347,21 @@ logText += "start recognition = " + getTime() + "\n";
 	{
 		let area = odjectsData['Area'+i.toString() ];
 		
- 		if ( area.type == "cardsOnTable"  || area.type == "CardsOfPlayer1" )
+ 		if ( area.type == "cardsOnTable"  /*|| area.type == "CardsOfPlayer1" */)
  		{
  			logText += "Area "+i.toString() +  "("+area.type+"): " + getTime() + "\n";
 
 			let dataArr = functions.slice2dArr( data, area ); 
 			logText += "get areas from img = " + getTime() + "\n";
- 			//functions.setArrToCanvas( dataArr , "canvas2");
+ 			functions.setArrToCanvas( dataArr , "canvas2");
 	 
 			dataArr = functions.blurryColorImg(dataArr,  1, "averaging-to-new" );
 			logText += "get blurry = " + getTime() + "\n";
-			//functions.setArrToCanvas( dataArr , "canvas3");
+			functions.setArrToCanvas( dataArr , "canvas3");
 
 			dataArr = functions.binarize( dataArr , 4, 2, 140 );
 			logText += "binarize  = " + getTime() + "\n";
-	 		//functions.setArrToCanvas( dataArr , "canvas4");
+	 		functions.setArrToCanvas( dataArr , "canvas4");
 
 	 		let findObjects = [];
 			findObjects = functions.segmentationArrayPixelscan( dataArr );
@@ -334,7 +380,7 @@ logText += "start recognition = " + getTime() + "\n";
 			for (var n = 0; n < findObjects.length; n++) 
 			{
 				let dataArr16x16 = functions.resampleSingleArr(findObjects[n].data2dAr, 16, 16);
-				//functions.setArrToCanvas( dataArr16x16 , "canvas"+ (5+n).toString() );
+				functions.setArrToCanvas( dataArr16x16 , "canvas"+ (5+n).toString() );
 				//logText += "resample  obj" + n.toString() + ": " + getTime() + "\n";
 
 				let bin16x16 = functions.binarizeArray(dataArr16x16,127);
@@ -380,7 +426,7 @@ logText += "start recognition = " + getTime() + "\n";
  
 			logText += "find cards:  [" + cards.toString() + "] : " + getTime() + "\n";
 		} 
-		else if ( area.type == "PotOnTable" )
+/*		else if ( area.type == "PotOnTable" )
 		{
 			logText += "Area "+i.toString() + "("+area.type+"): " + getTime() + "\n";
 
@@ -534,7 +580,7 @@ logText += "start recognition = " + getTime() + "\n";
 
 		}
 
-
+*/
 
 
 

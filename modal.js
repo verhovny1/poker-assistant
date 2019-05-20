@@ -84,7 +84,22 @@ function setArrToCanvas( dataArray, W,H , canvasId, restAr = null)
 				 data[i+3] = 255;
 			}
 
+			else if ( i % (W*4) == x1*4 &&  i >= (W*y1+x1)*4  && i <=  (W * y2 + x1) * 4  )
+	 		{
+	 			 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+	 		}
 	 		else if ( i % (W*4) == (x1+1)*4 &&  i >= (W*y1+x1)*4  && i <=  (W * y2 + x1) * 4  )
+	 		{
+	 			 data[i] = 255;
+				 data[i+1] = 0;
+				 data[i+2] = 0;
+				 data[i+3] = 255;
+	 		}
+
+	 		else if ( i % (W*4) == x2*4 &&  i >= (W*y1+x2)*4  && i <=  (W * y2 + x2) * 4  )
 	 		{
 	 			 data[i] = 255;
 				 data[i+1] = 0;
